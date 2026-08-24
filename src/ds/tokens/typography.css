@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap');
+:root{
+  --font-display:'Anton',Impact,sans-serif;   /* titres, cotes en gros, podium, révélations */
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; /* formules, debug */
+
+  /* registre "marché" — dense, tient sur mobile */
+  --text-micro:11px;   /* libellés au-dessus des cotes, badges */
+  --text-xs:12.5px;    /* méta, sous-titres de carte */
+  --text-sm:14.5px;    /* corps secondaire */
+  --text-base:16.5px;  /* corps */
+  --text-md:19px;      /* valeurs, noms de joueurs en avant */
+  --text-lg:24px;      /* cote mise en avant, solde */
+  --text-xl:30px;      /* chiffre héros d'une carte (cote très visible) */
+
+  /* registre "moment" — display, lu à 3 mètres */
+  --display-sm:32px;
+  --display-md:48px;
+  --display-lg:clamp(56px,11vw,96px);
+  --display-xl:clamp(72px,15vw,140px);
+
+  --lh-tight:1.05;
+  --lh-snug:1.2;
+  --lh-normal:1.5;
+  --lh-loose:1.62;
+
+  --tracking-wide:.08em;
+  --tracking-widest:.16em;
+}
+/* Règle non négociable : tout chiffre qui bouge (cote, solde, chrono) */
+.tnum, .tnum *{font-variant-numeric:tabular-nums}

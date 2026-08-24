@@ -1,22 +1,49 @@
-# Olympiade de l'adresse
+# BetClash
 
-Le règlement du week-end : duels le samedi, équipes le dimanche, paris en continu et cinq titres à prendre.
+Application web de tournoi et de paris entre amis. Générique : elle héberge des
+évènements, chacun avec son nom, ses dates et ses réglages.
 
-👉 **[Lire les règles](https://petite-olive-verte.github.io/jeux-de-l-adresse/)**
+**Premier évènement : Olympiade de l'adresse**, 10 & 11 octobre 2026.
 
-## Le principe
+👉 **[Voir la page](https://petite-olive-verte.github.io/jeux-de-l-adresse/)**
 
-- **Samedi** — duels 1 contre 1, système suisse, 5 tours, personne n'est éliminé.
-- **Samedi soir** — les premiers du classement draftent leurs équipes.
-- **Dimanche** — jeux en équipe, chacune contre toutes ; l'équipe au repos tient le marché des paris.
-- **Tout le week-end** — paris mutuels à cotes variables entre tous les participants.
+```bash
+npm install
+npm run dev
+```
 
-## La règle d'or
+## Structure
 
-Gagner des duels rapporte des jetons. Gagner des paris ne rapporte aucun point.
-La passerelle entre les deux classements ne va que dans un sens, ce qui rend le sabotage
-d'un duel structurellement perdant.
+```
+src/
+  ds/                  design system importé de Claude Design
+    tokens/            colors · typography · spacing · effects (copiés à l'identique)
+    Button.jsx         port fidèle de components/core/Button.jsx
+    Countdown.jsx      port fidèle de components/moment/Countdown.jsx
+  presentation/
+    content.jsx        tout ce qui change d'un évènement à l'autre
+    Presentation.jsx   la page
+    presentation.css   composition + responsive
+```
 
----
+## Deux principes hérités du design system
 
-Page statique, sans dépendance. `index.html` est le seul fichier qui compte.
+**Les rôles de couleur sont séparés.** `--jeton` n'est pas `--success`,
+`--market-down` n'est pas `--error`. Un solde en jetons et une action validée ne
+partagent pas de token, même s'ils sont visuellement proches.
+
+**Tout chiffre qui bouge est en `tabular-nums`** (classe `.tnum`) : cotes,
+soldes, décompte. Sans ça l'interface tremble à chaque tick.
+
+## Générique par construction
+
+Aucun effectif, nombre de tours ou nombre d'équipes n'est codé en dur. Le contenu
+vit dans `content.jsx`, les mises en page utilisent des grilles qui refluent
+(`auto-fit`/`minmax`) plutôt que des colonnes comptées.
+
+## Déploiement
+
+Chaque push sur `main` déclenche `.github/workflows/deploy.yml`, qui construit
+le site et le publie sur GitHub Pages. Le `base` de Vite vaut
+`/jeux-de-l-adresse/` : la page est servie depuis un sous-chemin, pas depuis la
+racine du domaine.

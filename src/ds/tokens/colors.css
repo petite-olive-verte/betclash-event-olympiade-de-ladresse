@@ -1,0 +1,57 @@
+:root{
+  /* ---- base neutrals (from règlement page) ---- */
+  --bg:#0b0d12;
+  --surface:#141821;
+  --surface-2:#1b2029;
+  --surface-3:#21273299;
+  --line:#272e3c;
+  --line-strong:#394258;
+  --text:#e9ecf3;
+  --text-muted:#8d95a9;
+  --text-faint:#5b6478;
+
+  /* ---- brand ---- */
+  --gold:#f5c542;
+  --gold-strong:#ffd766;
+  --gold-wash:rgba(245,197,66,.12);
+  --gold-line:rgba(245,197,66,.4);
+
+  /* ---- semantic pairs kept DELIBERATELY separate (see readme) ---- */
+  --jeton:#35d07f;           /* solde / gains en jetons — jamais un score */
+  --jeton-wash:rgba(53,208,127,.12);
+  --market-up:#43e08f;       /* une cote qui monte */
+  --success:#2bb6a3;         /* action validée (pari placé, score confirmé) */
+  --success-wash:rgba(43,182,163,.14);
+  --market-down:#ff5f5f;     /* une cote qui baisse */
+  --error:#ef4360;           /* erreur, refus, plafond atteint */
+  --error-wash:rgba(239,67,96,.13);
+  --info:#5aa9ff;            /* live, liens, neutre informatif */
+  --info-wash:rgba(90,169,255,.12);
+
+  /* ---- "moment" register — saturated full-bleed backgrounds ---- */
+  --moment-bg:#3a1a52;
+  --moment-bg-2:#170a24;
+  --moment-gold:#ffd766;
+
+  /* ---- rank accents (podium / classements) ---- */
+  --rank-1:#f5c542;
+  --rank-2:#c8ccd8;
+  --rank-3:#d98a4e;
+}
+
+/* ---- white mode — pour les pages publiques (annonce, accueil) ---- */
+[data-theme="light"]{
+  --bg:#ffffff;
+  --surface:#f7f6f2;
+  --surface-2:#eeece4;
+  --surface-3:#eeece499;
+  --line:#e2ded2;
+  --line-strong:#cdc7b6;
+  --text:#14161c;
+  --text-muted:#5b5748;
+  --text-faint:#8b8674;
+  --gold-wash:rgba(196,145,10,.1);
+  --jeton-wash:rgba(43,182,163,.1);
+  --error-wash:rgba(239,67,96,.09);
+  --info-wash:rgba(90,169,255,.1);
+}

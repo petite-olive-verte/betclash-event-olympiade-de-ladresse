@@ -1,0 +1,14 @@
+:root{
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:20px; --sp-6:24px;
+  --sp-7:32px; --sp-8:40px; --sp-9:48px; --sp-10:64px; --sp-11:80px;
+
+  --radius-sm:8px;
+  --radius-md:14px;   /* carte standard — hérité du règlement */
+  --radius-lg:20px;   /* feuilles, panneaux plein écran */
+  --radius-pill:999px;
+
+  --container-mobile:428px;
+  --container-web:1280px;
+  --gutter-mobile:16px;
+  --gutter-web:32px;
+}
