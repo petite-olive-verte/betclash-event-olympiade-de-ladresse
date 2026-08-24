@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { Button, Countdown } from '../ds'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Icon } from './icons.jsx'
 import { ShootableTitle, ShootingRange } from './ShootingRange.jsx'
 import {
@@ -236,13 +237,40 @@ function GoldenRule() {
           Gagner des duels rapporte des jetons.<br />Gagner des paris ne rapporte aucun point.
         </p>
         <p className="prose">
-          Les deux classements sont totalement séparés. Il n'y a pas de passerelle, et elle ne va que dans
-          un sens : le terrain alimente la cagnotte, jamais l'inverse.
+          Il y a deux classements, et <strong>une seule passerelle entre eux</strong>. Elle ne va que dans
+          un sens : le terrain remplit la cagnotte, la cagnotte ne remplit jamais le terrain.
         </p>
+
+        <div className="oneway" aria-hidden="true">
+          <div className="oneway-side" data-icon="target">
+            <span className="oneway-label">Le terrain</span>
+            <span className="oneway-what">duels et équipes</span>
+            <span className="oneway-earn">points + jetons</span>
+          </div>
+
+          <div className="oneway-link">
+            <span className="oneway-arrow oneway-yes">
+              <ArrowRight size={20} strokeWidth={1.75} absoluteStrokeWidth />
+              <em>rapporte</em>
+            </span>
+            <span className="oneway-arrow oneway-no">
+              <ArrowLeft size={20} strokeWidth={1.75} absoluteStrokeWidth />
+              <em>jamais</em>
+            </span>
+          </div>
+
+          <div className="oneway-side" data-icon="dice">
+            <span className="oneway-label">La cagnotte</span>
+            <span className="oneway-what">jetons et paris</span>
+            <span className="oneway-earn">jetons seulement</span>
+          </div>
+        </div>
+
         <p className="prose">
-          L'an dernier c'était le contraire : parier rapportait plus que jouer, et il pouvait devenir
-          rentable de perdre un duel exprès. Cette année, si tu perds volontairement, tu perds des points
-          bien réels et tu gagnes une monnaie qui ne te fera jamais remonter au classement.
+          Autrement dit : <strong>gagner des paris ne te fera jamais remonter au classement des duels</strong>.
+          L'an dernier c'était le contraire, parier rapportait plus que jouer, et il pouvait devenir rentable
+          de perdre un duel exprès. Cette année, si tu perds volontairement, tu perds des points bien réels et
+          tu gagnes une monnaie qui ne te fera pas remonter.
         </p>
         <p className="rule-kicker">Ça ne vaut jamais le coup. C'est fait pour.</p>
       </div>
