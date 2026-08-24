@@ -171,6 +171,7 @@
     min-width:62px; text-align:right;
   }
   .row .jet{font-size:12.5px; color:var(--green); min-width:74px; text-align:right; font-weight:600}
+  .row.two{grid-template-columns:1fr auto}
   .row.loss .pts{color:var(--muted)}
   .row.loss .res{color:var(--muted)}
 
@@ -246,7 +247,7 @@
   <div class="scroller">
     <a href="#regle">La règle d'or</a>
     <a href="#samedi">Samedi</a>
-    <a href="#paris">Les paris</a>
+    <a href="#paris">Jetons &amp; paris</a>
     <a href="#dimanche">Dimanche</a>
     <a href="#prix">Meilleur jeu</a>
     <a href="#titres">Les titres</a>
@@ -295,11 +296,12 @@
 
     <h3>Les points</h3>
     <div class="scores">
-      <div class="row"><span class="res">Victoire 2 – 0</span><span class="pts">4 pts</span><span class="jet">+200 jetons</span></div>
-      <div class="row"><span class="res">Victoire 2 – 1</span><span class="pts">3 pts</span><span class="jet">+150 jetons</span></div>
-      <div class="row loss"><span class="res">Défaite 1 – 2</span><span class="pts">1 pt</span><span class="jet">&nbsp;</span></div>
-      <div class="row loss"><span class="res">Défaite 0 – 2</span><span class="pts">0 pt</span><span class="jet">&nbsp;</span></div>
+      <div class="row two"><span class="res">Victoire 2 – 0</span><span class="pts">4 pts</span></div>
+      <div class="row two"><span class="res">Victoire 2 – 1</span><span class="pts">3 pts</span></div>
+      <div class="row two loss"><span class="res">Défaite 1 – 2</span><span class="pts">1 pt</span></div>
+      <div class="row two loss"><span class="res">Défaite 0 – 2</span><span class="pts">0 pt</span></div>
     </div>
+    <p>Chaque duel gagné rapporte en plus <strong class="green">100 jetons</strong> pour parier.</p>
     <p>Le point de consolation à 1–2 n'est pas décoratif : sur cinq tours, il fait la différence entre la cinquième et la dixième place. Accrochez-vous même mal partis.</p>
 
     <h3>Le draft, samedi soir</h3>
@@ -310,28 +312,37 @@
 
   <!-- 03 -->
   <section id="paris">
-    <div class="sec-head"><span class="num">03</span><h2>Les paris</h2></div>
-    <p class="sub">Pari mutuel. Personne ne fixe les cotes, c'est le groupe qui les fait.</p>
+    <div class="sec-head"><span class="num">03</span><h2>Les jetons et les paris</h2></div>
+    <p class="sub">Une seule cagnotte, une seule formule, quatre règles.</p>
 
-    <p>Tout le monde démarre à <strong class="green">1000 jetons</strong>, plus <strong class="green">100 offerts à chaque nouveau tour</strong>. Personne ne peut se retrouver à sec et regarder le week-end depuis le banc.</p>
-    <p>Il n'y a pas de cotes décidées par quelqu'un. Tout le monde mise, et la cagnotte du duel est partagée entre les gagnants au prorata de leur mise :</p>
+    <h3>D'où viennent les jetons</h3>
+    <div class="scores">
+      <div class="row two"><span class="res">Au départ</span><span class="pts">1000</span></div>
+      <div class="row two"><span class="res">Chaque duel gagné</span><span class="pts">+100</span></div>
+      <div class="row two"><span class="res">Ton jeu est retenu</span><span class="pts">+100</span></div>
+      <div class="row two"><span class="res">Ton jeu élu meilleur jeu</span><span class="pts">+500</span></div>
+    </div>
+    <p>C'est tout. Il n'y a pas d'autre source, et <strong>ils ne se transforment jamais en points</strong>.</p>
 
-    <div class="formula">cote = cagnotte totale ÷ ce qui est misé sur ce camp
+    <h3>Comment marchent les paris</h3>
+    <p>Personne ne fixe les cotes. Tout le monde mise, et la cagnotte du duel est partagée entre les gagnants au prorata de leur mise :</p>
+
+    <div class="formula">cote = cagnotte du duel ÷ ce qui est misé sur ce camp
 gain = ta mise × la cote</div>
 
-    <p>Les cotes bougent en direct dans l'appli au fur et à mesure que les mises tombent. <strong>Miser sur l'outsider quand personne n'y croit, c'est là que ça paie.</strong></p>
+    <p>Plus il y a de monde sur un joueur, moins il paie. <strong>Miser sur l'outsider quand personne n'y croit, c'est là que ça paie.</strong> Les cotes bougent en direct dans l'appli au fur et à mesure des mises.</p>
 
     <div class="card">
-      <div class="card-title">Les règles du marché</div>
+      <div class="card-title">Les quatre règles</div>
       <ul>
-        <li>Mise entre <strong>50 jetons</strong> et <strong>20 % de ta cagnotte</strong>. Pas de tapis : un seul pari ne doit jamais faire basculer un classement.</li>
-        <li>Cote <strong>plafonnée à 3,0</strong>. Ce qui dépasse part dans la cagnotte de la maison, qui amorce les duels suivants.</li>
-        <li>La banque met <strong>100 jetons sur chaque duel</strong>, 50 de chaque côté. Sans ça, quand tout le monde mise sur le favori la cote tombe à 1,0 et il n'y a plus rien à gagner.</li>
-        <li>Les <strong>deux joueurs d'un duel ne parient pas dessus</strong>, ni dans un sens ni dans l'autre.</li>
-        <li>Les paris <strong>ferment quand la première manche commence</strong>. Les deux ou trois duels suivants sont affichés à l'avance : tu paries pendant que le duel en cours se joue.</li>
-        <li>Égalité, forfait, blessure : <strong>tout le monde est remboursé</strong>.</li>
+        <li>Tu mises <strong>ce que tu veux, jusqu'à 20 % de ta cagnotte</strong>. Pas de tapis : personne ne peut se ruiner, et un seul pari ne fait jamais basculer un classement.</li>
+        <li>La maison pose <strong>50 jetons sur chaque camp</strong> avant l'ouverture. Sans ça, quand tout le monde mise sur le favori, la cote tombe à 1 et il n'y a plus rien à gagner.</li>
+        <li>Tu <strong>ne paries pas sur un duel que tu joues</strong>.</li>
+        <li>Les paris <strong>ferment quand la première manche commence</strong>. Les duels suivants sont affichés à l'avance : tu paries pendant que le duel en cours se joue.</li>
       </ul>
     </div>
+
+    <p>Égalité, forfait, blessure : <strong>tout le monde est remboursé</strong>.</p>
 
     <div class="warn">
       <div class="lbl">Match arrangé</div>
@@ -373,7 +384,7 @@ gain = ta mise × la cote</div>
     </div>
 
     <p>La deuxième question n'est pas là pour décorer. Un jeu où seul son parrain gagne, ça se voit en deux duels, et ça coûte le prix. <strong>Inventez des jeux justes, pas des jeux où vous gagnez.</strong></p>
-    <p>Le gagnant de samedi touche <strong class="green">300 jetons</strong>, utilisables dès dimanche.</p>
+    <p>Le gagnant de samedi touche <strong class="green">500 jetons</strong>, utilisables dès dimanche. C'est autant que si tu avais gagné tous tes duels de la journée.</p>
 
     <div class="warn" style="border-color:var(--line); background:var(--surface)">
       <div class="lbl" style="color:var(--gold)">À noter</div>
