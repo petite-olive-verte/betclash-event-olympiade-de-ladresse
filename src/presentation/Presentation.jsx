@@ -91,7 +91,9 @@ function Section({ id, icon, title, sub, badge, moment, children }) {
           </div>
           {badge && <div className="day-badge">{badge}</div>}
           <h2 id={`${id}-title`}>{title}</h2>
-          <p className="sub">{sub}</p>
+          {/* Sans sous-titre, un paragraphe vide garderait sa marge basse et
+              ouvrirait un trou sous le titre. */}
+          {sub && <p className="sub">{sub}</p>}
         </div>
         {children}
       </div>
@@ -115,17 +117,24 @@ function Hero() {
     <header className="hero-moment" data-theme="dark" id="hero">
       <ShootingRange>
       <div className="hero">
-      <div className="brandmark">{event.app}</div>
+      {/* Ce qui tient dans le premier écran d'un téléphone. Sur grand écran le
+          bloc s'efface (`display: contents`) et ses enfants redeviennent des
+          enfants directs du hero : la mise en page ne bouge pas d'un pixel. */}
+      <div className="hero-screen">
+        <div className="hero-part brandmark" style={{ '--i': 0 }}>{event.app}</div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
-        <span className="kicker">{event.edition} · {event.datesLabel}</span>
-        <ShootableTitle lines={event.name} />
-        <p className="tagline">{event.tagline}</p>
+        <div className="hero-part hero-title" style={{ '--i': 1 }}>
+          <span className="kicker">{event.edition} · {event.datesLabel}</span>
+          <ShootableTitle lines={event.name} />
+          <p className="tagline">{event.tagline}</p>
+        </div>
+
+        <div className="hero-part hero-cd" style={{ '--i': 2 }}>
+          <Countdown target={event.startsAt} variant="hero" label="Il reste" />
+        </div>
       </div>
 
-      <Countdown target={event.startsAt} variant="hero" label="Il reste" />
-
-      <div className="stats">
+      <div className="hero-part stats" style={{ '--i': 3 }}>
         {stats.map((s) => (
           <div key={s.k} style={{ textAlign: 'center' }}>
             <div className="stat-v tnum">{s.v}</div>
@@ -134,12 +143,12 @@ function Hero() {
         ))}
       </div>
 
-      <div className="actions">
+      <div className="hero-part actions" style={{ '--i': 4 }}>
         <Button variant="primary" size="lg" href="#proposer">Rejoindre l'évènement</Button>
         <Button variant="ghost" size="lg" href="#regle">Voir le règlement</Button>
       </div>
 
-      <nav className="pills" aria-label="Sections du règlement">
+      <nav className="hero-part pills" style={{ '--i': 5 }} aria-label="Sections du règlement">
         {navItems.map((n) => {
           const active = current === n.href.slice(1)
           return (
@@ -228,8 +237,7 @@ function Brief() {
 function GoldenRule() {
   return (
     <Section
-      id="regle" icon="book" title="La règle d'or"
-      sub="Si vous ne lisez qu'un paragraphe, c'est celui-là."
+      id="regle" icon="book" title="Une règle importante"
       moment
     >
       <div className="panel-gold">
@@ -266,11 +274,22 @@ function GoldenRule() {
           </div>
         </div>
 
+        <div className="eyebrow" style={{ marginTop: 'var(--sp-6)' }}>Pourquoi deux classements séparés</div>
+
         <p className="prose">
-          Autrement dit : <strong>gagner des paris ne te fera jamais remonter au classement des duels</strong>.
-          L'an dernier c'était le contraire, parier rapportait plus que jouer, et il pouvait devenir rentable
-          de perdre un duel exprès. Cette année, si tu perds volontairement, tu perds des points bien réels et
-          tu gagnes une monnaie qui ne te fera pas remonter.
+          <strong>Parce qu'ils ne mesurent pas la même chose.</strong> Le classement des duels mesure ton
+          adresse au jeu. Le classement des parieurs mesure ta lecture des autres : savoir qui va gagner
+          n'a rien à voir avec savoir gagner. Deux talents, donc deux titres.
+        </p>
+        <p className="prose">
+          <strong>Et parce que les mélanger casserait les deux.</strong> Si les paris alimentaient le
+          classement des duels, on pourrait y grimper sans jouer. Pire : il deviendrait rentable de miser
+          contre soi puis de perdre son duel exprès. C'est exactement ce qui s'est passé l'an dernier —
+          parier rapportait plus que jouer.
+        </p>
+        <p className="prose">
+          Cette année, si tu perds volontairement, tu perds des points bien réels et tu gagnes une monnaie
+          qui ne te fera pas remonter.
         </p>
         <p className="rule-kicker">Ça ne vaut jamais le coup. C'est fait pour.</p>
       </div>

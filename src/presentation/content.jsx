@@ -21,7 +21,7 @@ export const stats = [
 ]
 
 export const navItems = [
-  { href: "#regle", icon: "book", label: "La règle d'or" },
+  { href: "#regle", icon: "book", label: "La règle qui compte" },
   { href: "#samedi", icon: "target", label: "Samedi" },
   { href: "#paris", icon: "dice", label: "Jetons & paris" },
   { href: "#dimanche", icon: "team", label: "Dimanche" },

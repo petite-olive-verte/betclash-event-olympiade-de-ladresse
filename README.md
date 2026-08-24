@@ -64,7 +64,7 @@ le règlement : c'est du texte long, il faut pouvoir le lire.
 
 Le **registre « moment »** — `--moment-bg`, `--display-xl`, `--shadow-gold-glow`,
 décrit dans les tokens comme des fonds saturés pleine largeur et du texte « lu à
-3 mètres » — porte le hero et la règle d'or. Ce sont les deux endroits où la page
+3 mètres » — porte le hero et la règle qui compte. Ce sont les deux endroits où la page
 annonce plutôt qu'elle n'explique.
 
 Une section repasse dans le registre sombre avec `data-theme="dark"`. Ça
@@ -80,8 +80,8 @@ partagent pas de token, même s'ils sont visuellement proches.
 **Une encre par rôle, pas par jolie couleur.** Les icônes sont colorées par ce
 qu'elles désignent : `dice` porte `--ink-jeton` parce qu'il s'agit du marché,
 `target` et `team` partagent `--ink-terrain` parce que duels et équipes
-alimentent le même classement. La couleur redit la règle d'or plutôt que de
-décorer. Les encres sont assombries en thème clair : les teintes sémantiques
+alimentent le même classement. La couleur redit la règle centrale de
+l'évènement plutôt que de décorer. Les encres sont assombries en thème clair : les teintes sémantiques
 sont réglées pour un fond sombre et plafonnent à 1,6:1 sur blanc.
 
 **Tout chiffre qui bouge est en `tabular-nums`** (classe `.tnum`) : cotes,
