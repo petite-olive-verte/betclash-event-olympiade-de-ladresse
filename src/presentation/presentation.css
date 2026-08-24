@@ -74,6 +74,8 @@ html { scroll-padding-top: 72px; }
   line-height: var(--lh-snug);
   margin: 0 0 10px;
 }
+/* Quand il n'y a pas de sous-titre, c'est au titre de tenir l'espace. */
+.section h2:last-child { margin-bottom: var(--sp-8); }
 .section .sub {
   color: var(--text-muted);
   font-size: var(--text-base);
@@ -197,6 +199,18 @@ html { scroll-padding-top: 72px; }
   max-width: 900px;
   margin: 0 auto;
 }
+.hero-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.hero-cd { display: block; }
+
+/* Sur grand écran le conteneur n'existe pas : ses enfants sont les enfants du
+   hero, exactement comme avant. */
+.hero-screen { display: contents; }
+
 .hero h1 {
   font-family: var(--font-display);
   text-transform: uppercase;
@@ -287,7 +301,22 @@ footer.page-footer {
 @media (max-width: 760px) {
   .wrap { padding: 0 var(--gutter-mobile); }
   .section { padding: var(--sp-9) 0; }
-  .hero { padding: var(--sp-10) var(--sp-5) var(--sp-8); gap: var(--sp-6); }
+  .hero { padding: 0 var(--sp-5) var(--sp-8); gap: var(--sp-8); }
+  /* Le premier écran tient dans la hauteur visible et rien de plus : le reste
+     se mérite au défilement. `dvh` plutôt que `vh` parce que la barre
+     d'adresse mange de la hauteur et que `vh` l'ignore — l'écran déborderait
+     de sa taille exactement. */
+  .hero-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-7);
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: var(--sp-8) 0 var(--sp-6);
+    width: 100%;
+  }
   /* rangée de stats irrégulière quand elle passe à la ligne : grille 2x2 */
   .stats {
     display: grid;
@@ -302,6 +331,20 @@ footer.page-footer {
   .cd-cell { padding: 14px 10px !important; }
   .cd-cell > div:first-child { font-size: 32px !important; }
 }
+/* Sur un écran court — un iPhone SE fait 568 px de haut — le premier écran
+   débordait et le décompte passait sous la ligne de flottaison. On resserre
+   plutôt que de laisser tomber ce qu'il doit montrer. */
+@media (max-width: 760px) and (max-height: 680px) {
+  .hero-screen { gap: var(--sp-4); padding: var(--sp-5) 0 var(--sp-4); }
+  .hero-title { gap: 8px; }
+  .hero h1 { font-size: clamp(46px, 13vw, 72px); }
+  .tagline { font-size: var(--text-sm); }
+  .cd-cell { padding: 10px 8px !important; }
+  .cd-cell > div:first-child { font-size: 26px !important; }
+  .range-hint { font-size: 11px; }
+  .title-wrap { padding-bottom: 24px; }
+}
+
 @media (max-width: 380px) {
   .cd-cell { padding: 12px 6px !important; }
 }
@@ -591,16 +634,20 @@ footer.page-footer {
   to   { opacity: 1; transform: none; box-shadow: var(--shadow-gold-glow); }
 }
 /* Même raison : `forwards` laissait une matrice identité sur chaque bloc du
-   hero, autant de blocs conteneurs parasites. */
-.reveal-ready .hero > * {
+   hero, autant de blocs conteneurs parasites.
+
+   Le rang vient d'une variable posée sur chaque bloc, plus de sa position :
+   envelopper les trois premiers pour le mobile aurait sinon décalé toute la
+   chorégraphie. Le titre attend que ses deux lignes soient montées. */
+.reveal-ready .hero-part {
   animation: rise var(--reveal-dur) var(--ease-reveal) backwards;
+  animation-delay: var(--part-delay);
 }
-.reveal-ready .hero > *:nth-child(1) { animation-delay: 80ms; }
-.reveal-ready .hero > *:nth-child(2) { animation-delay: 200ms; }
-.reveal-ready .hero > *:nth-child(3) { animation-delay: 900ms; }
-.reveal-ready .hero > *:nth-child(4) { animation-delay: 1080ms; }
-.reveal-ready .hero > *:nth-child(5) { animation-delay: 1240ms; }
-.reveal-ready .hero > *:nth-child(6) { animation-delay: 1400ms; }
+.hero-part { --part-delay: calc(80ms + var(--i) * 120ms); }
+.hero-part.hero-cd,
+.hero-part.stats,
+.hero-part.actions,
+.hero-part.pills { --part-delay: calc(900ms + (var(--i) - 2) * 170ms); }
 /* Le décompte est le point d'arrivée du regard : sa lueur s'allume avec lui,
    une fois le titre entièrement monté. */
 .reveal-ready .hero .cd-grid {

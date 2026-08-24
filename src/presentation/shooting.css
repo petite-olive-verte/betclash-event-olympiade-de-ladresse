@@ -22,7 +22,7 @@
    sur une déclaration normale. Sans lui, la moitié du hero refuse de partir —
    exactement ce qu'on observait : le kicker et le tagline s'effaçaient, les
    stats et le sommaire restaient. */
-.range.is-playing .hero > *:not(:nth-child(2)),
+.range.is-playing .hero-part:not(.hero-title),
 .range.is-playing .kicker,
 .range.is-playing .tagline {
   opacity: 0 !important;
@@ -251,7 +251,7 @@
   .range.is-firing .crosshair { animation: none; }
   .crosshair, .range-icon { transition: none; }
   .range-icon:hover { transform: none; }
-  .range.is-playing .hero > *:not(:nth-child(2)),
+  .range.is-playing .hero-part:not(.hero-title),
   .range.is-playing .kicker,
   .range.is-playing .tagline { transition: none; }
 }
