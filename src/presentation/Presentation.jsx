@@ -42,6 +42,36 @@ function useSectionSpy(ids) {
   return current
 }
 
+/* Les groupes qui entrent en scène. Passer par des sélecteurs plutôt que par
+   une prop sur chaque bloc évite d'avoir à baliser une trentaine d'endroits —
+   et un groupe oublié se voit tout de suite, il n'apparaît simplement pas. */
+const REVEAL = '.section-head, .autogrid, .split, .card.list, .panel-gold, .bullets, .panel-error'
+
+function useReveal() {
+  useEffect(() => {
+    // Personne ne doit se retrouver devant une page vide : l'état masqué n'est
+    // posé qu'une fois l'observateur en place, et jamais si le lecteur a
+    // demandé qu'on lui épargne les animations.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const root = document.documentElement
+    root.classList.add('reveal-ready')
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue
+          e.target.classList.add('is-revealed')
+          io.unobserve(e.target)   // une entrée en scène ne se rejoue pas
+        }
+      },
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.05 },
+    )
+    for (const el of document.querySelectorAll(REVEAL)) io.observe(el)
+
+    return () => { io.disconnect(); root.classList.remove('reveal-ready') }
+  }, [])
+}
+
 function Section({ id, icon, title, sub, badge, moment, children }) {
   const active = useContext(CurrentSection) === id
   return (
@@ -52,13 +82,15 @@ function Section({ id, icon, title, sub, badge, moment, children }) {
       aria-labelledby={`${id}-title`}
     >
       <div className="wrap">
-        <div className={`section-rule${active ? ' is-active' : ''}`} data-icon={icon}>
-          <span className="section-icon"><Icon name={icon} size={22} /></span>
-          <div className="bar" />
+        <div className="section-head">
+          <div className={`section-rule${active ? ' is-active' : ''}`} data-icon={icon}>
+            <span className="section-icon"><Icon name={icon} size={22} /></span>
+            <div className="bar" />
+          </div>
+          {badge && <div className="day-badge">{badge}</div>}
+          <h2 id={`${id}-title`}>{title}</h2>
+          <p className="sub">{sub}</p>
         </div>
-        {badge && <div className="day-badge">{badge}</div>}
-        <h2 id={`${id}-title`}>{title}</h2>
-        <p className="sub">{sub}</p>
         {children}
       </div>
     </section>
@@ -483,6 +515,7 @@ const SECTION_IDS = navItems.map((n) => n.href.slice(1))
 
 export default function Presentation() {
   const current = useSectionSpy(SECTION_IDS)
+  useReveal()
   return (
     <CurrentSection value={current}>
     <div data-theme="light" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh', overflowX: 'hidden' }}>

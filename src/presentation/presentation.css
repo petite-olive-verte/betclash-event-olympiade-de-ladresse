@@ -450,3 +450,92 @@ footer.page-footer {
 @media (prefers-reduced-motion: reduce) {
   .stickybar { transition: opacity var(--dur-base), visibility var(--dur-base); transform: none; }
 }
+
+/* ═══════════════════════════════════════════════════ ENTRÉES EN SCÈNE
+   Une seule courbe pour toute la page, celle du design system : --ease-out
+   part vite et s'arrête net, ce qui donne un mouvement qui se pose au lieu
+   de flotter. Les durées viennent aussi des tokens.
+
+   `.reveal-ready` est posé par le JS au montage : sans lui, rien n'est
+   masqué. Une page dont le contenu dépend d'un observateur pour devenir
+   visible est une page cassée dès que l'observateur ne tourne pas. */
+
+.reveal-ready .section-head,
+.reveal-ready .panel-gold,
+.reveal-ready .panel-error,
+.reveal-ready .autogrid > *,
+.reveal-ready .split > *,
+.reveal-ready .card.list > *,
+.reveal-ready .bullets > * {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity var(--dur-slow) var(--ease-out),
+              transform var(--dur-slow) var(--ease-out);
+}
+
+.reveal-ready .section-head.is-revealed,
+.reveal-ready .panel-gold.is-revealed,
+.reveal-ready .panel-error.is-revealed,
+.reveal-ready .autogrid.is-revealed > *,
+.reveal-ready .split.is-revealed > *,
+.reveal-ready .card.list.is-revealed > *,
+.reveal-ready .bullets.is-revealed > * {
+  opacity: 1;
+  transform: none;
+}
+
+/* Le décalage fait lire la rangée de gauche à droite au lieu de la faire
+   surgir d'un bloc. Au-delà de six, l'attente devient perceptible : les
+   suivants arrivent avec le sixième. */
+.reveal-ready .autogrid.is-revealed > *:nth-child(2),
+.reveal-ready .split.is-revealed > *:nth-child(2),
+.reveal-ready .card.list.is-revealed > *:nth-child(2),
+.reveal-ready .bullets.is-revealed > *:nth-child(2) { transition-delay: 70ms; }
+.reveal-ready .autogrid.is-revealed > *:nth-child(3),
+.reveal-ready .card.list.is-revealed > *:nth-child(3),
+.reveal-ready .bullets.is-revealed > *:nth-child(3) { transition-delay: 140ms; }
+.reveal-ready .autogrid.is-revealed > *:nth-child(4),
+.reveal-ready .card.list.is-revealed > *:nth-child(4),
+.reveal-ready .bullets.is-revealed > *:nth-child(4) { transition-delay: 210ms; }
+.reveal-ready .autogrid.is-revealed > *:nth-child(n+5),
+.reveal-ready .card.list.is-revealed > *:nth-child(n+5),
+.reveal-ready .bullets.is-revealed > *:nth-child(n+5) { transition-delay: 280ms; }
+
+/* Le panneau de la règle d'or monte de plus loin : c'est une révélation,
+   elle a droit à plus d'amplitude que le reste. */
+.reveal-ready .panel-gold { transform: translateY(28px) scale(.985); }
+.reveal-ready .panel-gold.is-revealed { transform: none; }
+
+/* ---------- OUVERTURE DU HERO ----------
+   Pas d'observateur ici : le hero est déjà à l'écran au chargement. Les
+   éléments se posent dans l'ordre de lecture. */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes glow-in {
+  from { opacity: 0; transform: translateY(20px) scale(.96); box-shadow: none; }
+  to   { opacity: 1; transform: none; box-shadow: var(--shadow-gold-glow); }
+}
+.reveal-ready .hero > * {
+  opacity: 0;
+  animation: rise var(--dur-slow) var(--ease-out) forwards;
+}
+.reveal-ready .hero > *:nth-child(1) { animation-delay: 60ms; }
+.reveal-ready .hero > *:nth-child(2) { animation-delay: 160ms; }
+.reveal-ready .hero > *:nth-child(3) { animation-delay: 300ms; }
+.reveal-ready .hero > *:nth-child(4) { animation-delay: 420ms; }
+.reveal-ready .hero > *:nth-child(5) { animation-delay: 520ms; }
+.reveal-ready .hero > *:nth-child(6) { animation-delay: 620ms; }
+/* Le décompte est le point d'arrivée du regard : sa lueur s'allume avec lui. */
+.reveal-ready .hero .cd-grid {
+  animation: glow-in var(--dur-slow) var(--ease-out) 420ms backwards;
+}
+
+
+/* Rien de tout cela n'ajoute d'information : sans les animations, la page est
+   identique, simplement déjà en place. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-ready .hero > *,
+  .reveal-ready .hero .cd-grid { animation: none; opacity: 1; }
+}
