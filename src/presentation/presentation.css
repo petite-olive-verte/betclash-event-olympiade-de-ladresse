@@ -22,17 +22,17 @@
 .section-rule .section-icon {
   display: flex;
   flex: none;
-  color: var(--text-faint);
-  transition: color var(--dur-base) var(--ease-out),
-              transform var(--dur-base) var(--ease-out);
+  color: var(--icon-ink);
+  transition: transform var(--dur-base) var(--ease-out);
 }
 /* La section qu'on est en train de lire s'allume : c'est le seul repère de
-   position une fois le sommaire du hero hors de l'écran. */
-.section-rule.is-active .section-icon {
-  color: var(--gold);
-  transform: scale(1.12);
+   position une fois le sommaire du hero hors de l'écran. L'icône garde son
+   encre au repos — sinon la variété de couleurs ne se verrait qu'une section
+   à la fois — et c'est la barre qui reprend cette encre pour marquer l'état. */
+.section-rule.is-active .section-icon { transform: scale(1.12); }
+.section-rule.is-active .bar {
+  background: color-mix(in srgb, var(--icon-ink) 45%, transparent);
 }
-.section-rule.is-active .bar { background: var(--gold-line); }
 .section-rule .bar {
   flex: 1;
   height: 1px;
@@ -208,17 +208,18 @@
   text-decoration: none;
   transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast), color var(--dur-fast);
 }
-/* Les icônes Lucide dessinent en currentColor : la pastille entière change de
-   couleur d'un seul coup, texte et pictogramme ensemble. */
+/* L'icône garde son encre de rôle, le texte suit l'état de la pastille : la
+   barre de nav sert ainsi de légende au code couleur du reste de la page. */
+.pill > svg { color: var(--icon-ink); flex: none; }
 .pill:hover, .pill:focus-visible {
   background: var(--surface-2);
   border-color: var(--line-strong);
   color: var(--text);
 }
 .pill.is-active {
-  background: var(--gold-wash);
-  border-color: var(--gold-line);
-  color: var(--gold);
+  background: color-mix(in srgb, var(--icon-ink) 10%, transparent);
+  border-color: color-mix(in srgb, var(--icon-ink) 40%, transparent);
+  color: var(--icon-ink);
 }
 .pill:focus-visible, .card a:focus-visible, button:focus-visible, a:focus-visible {
   outline: none;
@@ -261,6 +262,22 @@ footer.page-footer {
   .cd-cell { padding: 12px 6px !important; }
 }
 
+/* ------------------------------------------------- ENCRE DES ICÔNES
+   Chaque icône porte le rôle de ce qu'elle désigne, pas une couleur choisie
+   pour l'œil. Deux icônes partagent une encre quand elles partagent un rôle :
+   `target` et `team` sont toutes deux le terrain — les duels du samedi et les
+   équipes du dimanche alimentent le même classement, à l'opposé du marché
+   des jetons. C'est la règle d'or de l'évènement, rendue en couleur. */
+[data-icon] { --icon-ink: var(--ink-meta); }
+[data-icon="book"]   { --icon-ink: var(--ink-brand); }
+[data-icon="target"] { --icon-ink: var(--ink-terrain); }
+[data-icon="team"]   { --icon-ink: var(--ink-terrain); }
+[data-icon="dice"]   { --icon-ink: var(--ink-jeton); }
+[data-icon="trophy"] { --icon-ink: var(--ink-rank-1); }
+[data-icon="medal"]  { --icon-ink: var(--ink-rank-3); }
+[data-icon="clock"]  { --icon-ink: var(--ink-info); }
+[data-icon="gear"]   { --icon-ink: var(--ink-meta); }
+
 /* ----------------------------------------------------------- LES TITRES */
 .title-card {
   border-radius: var(--radius-md);
@@ -270,12 +287,14 @@ footer.page-footer {
 }
 .title-card-icon {
   margin-bottom: 14px;
-  color: var(--gold);
-  transition: color var(--dur-base) var(--ease-out),
-              transform var(--dur-base) var(--ease-out);
+  color: var(--icon-ink);
+  transition: transform var(--dur-base) var(--ease-out);
 }
-.title-card:hover { border-color: var(--gold-line); transform: translateY(-2px); }
-.title-card:hover .title-card-icon { color: var(--gold-strong); transform: scale(1.08); }
+.title-card:hover {
+  border-color: color-mix(in srgb, var(--icon-ink) 40%, transparent);
+  transform: translateY(-2px);
+}
+.title-card:hover .title-card-icon { transform: scale(1.08); }
 
 /* ------------------------------------------------- LE FORMAT DE PROPOSITION */
 .format-row {
@@ -286,7 +305,7 @@ footer.page-footer {
   border-top: 1px solid var(--line);
   font-size: var(--text-sm);
 }
-.format-row > svg { color: var(--gold); flex: none; }
+.format-row > svg { color: var(--icon-ink); flex: none; }
 
 /* Aucun de ces états n'est porteur d'information à lui seul : les couper ne
    retire rien au contenu. */

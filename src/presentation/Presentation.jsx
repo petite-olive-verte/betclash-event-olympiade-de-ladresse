@@ -47,7 +47,7 @@ function Section({ id, icon, title, sub, badge, children }) {
   return (
     <section id={id} className="section" aria-labelledby={`${id}-title`}>
       <div className="wrap">
-        <div className={`section-rule${active ? ' is-active' : ''}`}>
+        <div className={`section-rule${active ? ' is-active' : ''}`} data-icon={icon}>
           <span className="section-icon"><Icon name={icon} size={22} /></span>
           <div className="bar" />
         </div>
@@ -110,6 +110,7 @@ function Hero() {
               key={n.href}
               className={`pill${active ? ' is-active' : ''}`}
               href={n.href}
+              data-icon={n.icon}
               aria-current={active ? 'true' : undefined}
             >
               <Icon name={n.icon} size={15} />
@@ -356,6 +357,7 @@ function Titles() {
             <div
               key={t.name}
               className={`title-card${t.highlight ? '' : ' card'}`}
+              data-icon={t.icon}
               style={{
                 borderRadius: 'var(--radius-md)',
                 padding: 'var(--sp-6)',
@@ -393,7 +395,7 @@ function Propose() {
         <div className="card list">
           <div className="card-label">Le format</div>
           {proposalFormat.map((f) => (
-            <div key={f.label} className="format-row">
+            <div key={f.label} className="format-row" data-icon={f.icon}>
               <Icon name={f.icon} size={20} /> {f.label}
             </div>
           ))}

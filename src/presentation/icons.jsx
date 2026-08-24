@@ -31,6 +31,7 @@ export function Icon({ name, size = 24, ...rest }) {
       strokeWidth={1.75}
       absoluteStrokeWidth
       aria-hidden="true"
+      data-icon={name}
       {...rest}
     />
   )

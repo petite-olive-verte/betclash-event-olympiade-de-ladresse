@@ -32,6 +32,13 @@ src/
 `--market-down` n'est pas `--error`. Un solde en jetons et une action validée ne
 partagent pas de token, même s'ils sont visuellement proches.
 
+**Une encre par rôle, pas par jolie couleur.** Les icônes sont colorées par ce
+qu'elles désignent : `dice` porte `--ink-jeton` parce qu'il s'agit du marché,
+`target` et `team` partagent `--ink-terrain` parce que duels et équipes
+alimentent le même classement. La couleur redit la règle d'or plutôt que de
+décorer. Les encres sont assombries en thème clair : les teintes sémantiques
+sont réglées pour un fond sombre et plafonnent à 1,6:1 sur blanc.
+
 **Tout chiffre qui bouge est en `tabular-nums`** (classe `.tnum`) : cotes,
 soldes, décompte. Sans ça l'interface tremble à chaque tick.
 
