@@ -7,8 +7,8 @@ Le règlement du week-end : duels le samedi, équipes le dimanche, paris en cont
 ## Le principe
 
 - **Samedi** — duels 1 contre 1, système suisse, 5 tours, personne n'est éliminé.
-- **Samedi soir** — les 3 premiers draftent leurs équipes.
-- **Dimanche** — 3 équipes en round-robin ; l'équipe au repos tient le marché des paris.
+- **Samedi soir** — les premiers du classement draftent leurs équipes.
+- **Dimanche** — jeux en équipe, chacune contre toutes ; l'équipe au repos tient le marché des paris.
 - **Tout le week-end** — paris mutuels à cotes variables entre tous les participants.
 
 ## La règle d'or
