@@ -118,7 +118,12 @@ function Hero() {
         <span className="kicker">{event.edition} · {event.datesLabel}</span>
         <h1>
           {event.name.map((line, i) => (
-            <span key={line} style={{ display: 'block' }}>{line}</span>
+            // Deux étages par ligne : le premier découpe la fenêtre, le second
+            // monte à l'intérieur. Le texte reste un seul nœud par ligne, donc
+            // il se lit et se sélectionne normalement.
+            <span key={line} className="h1-line" style={{ '--line-i': i }}>
+              <span>{line}</span>
+            </span>
           ))}
         </h1>
         <p className="tagline">{event.tagline}</p>

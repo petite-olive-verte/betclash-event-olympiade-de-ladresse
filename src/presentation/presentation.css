@@ -452,13 +452,28 @@ footer.page-footer {
 }
 
 /* ═══════════════════════════════════════════════════ ENTRÉES EN SCÈNE
-   Une seule courbe pour toute la page, celle du design system : --ease-out
-   part vite et s'arrête net, ce qui donne un mouvement qui se pose au lieu
-   de flotter. Les durées viennent aussi des tokens.
+   Le rythme est dérivé des tokens plutôt que posé en dur : --dur-slow est
+   calibré pour une transition d'interface, pas pour une mise en scène, mais
+   c'est lui qui donne le tempo — un multiple reste solidaire du système, un
+   nombre magique non.
 
    `.reveal-ready` est posé par le JS au montage : sans lui, rien n'est
    masqué. Une page dont le contenu dépend d'un observateur pour devenir
-   visible est une page cassée dès que l'observateur ne tourne pas. */
+   visible est cassée dès que l'observateur ne tourne pas. */
+.reveal-ready {
+  --reveal-dur: calc(var(--dur-slow) * 2);        /* 840 ms */
+  --reveal-step: calc(var(--dur-fast) * 1.15);    /* 138 ms entre deux voisins */
+  --reveal-shift: var(--sp-8);                    /* 40 px de course */
+
+  /* --ease-out couvre 83 % du trajet dans le premier quart de la durée et
+     97 % à la moitié. C'est ce qu'on veut d'un bouton qui répond à un clic :
+     il colle au doigt. Mais une entrée en scène jouée sur cette courbe a beau
+     durer 840 ms, elle en paraît 250 — on allonge l'immobilité finale, pas le
+     mouvement. Cette courbe-ci en est à 55 % au premier quart : le trajet se
+     voit sur toute sa longueur. --ease-out reste la courbe des états
+     d'interface (survol, pastilles, barre), qui eux doivent claquer. */
+  --ease-reveal: cubic-bezier(.33, .6, .25, 1);
+}
 
 .reveal-ready .section-head,
 .reveal-ready .panel-gold,
@@ -468,9 +483,15 @@ footer.page-footer {
 .reveal-ready .card.list > *,
 .reveal-ready .bullets > * {
   opacity: 0;
-  transform: translateY(18px);
-  transition: opacity var(--dur-slow) var(--ease-out),
-              transform var(--dur-slow) var(--ease-out);
+  transform: translateY(var(--reveal-shift)) scale(.97);
+  transition: opacity var(--reveal-dur) var(--ease-reveal),
+              transform var(--reveal-dur) var(--ease-reveal);
+}
+/* Les lignes de liste n'ont pas à changer d'échelle : côte à côte et serrées,
+   la mise à l'échelle se lit comme un défaut de rendu. */
+.reveal-ready .card.list > *,
+.reveal-ready .bullets > * {
+  transform: translateY(calc(var(--reveal-shift) * .5));
 }
 
 .reveal-ready .section-head.is-revealed,
@@ -485,57 +506,106 @@ footer.page-footer {
 }
 
 /* Le décalage fait lire la rangée de gauche à droite au lieu de la faire
-   surgir d'un bloc. Au-delà de six, l'attente devient perceptible : les
-   suivants arrivent avec le sixième. */
+   surgir d'un bloc. Il plafonne au cinquième : au-delà, on attend
+   l'animation au lieu de lire. */
 .reveal-ready .autogrid.is-revealed > *:nth-child(2),
 .reveal-ready .split.is-revealed > *:nth-child(2),
 .reveal-ready .card.list.is-revealed > *:nth-child(2),
-.reveal-ready .bullets.is-revealed > *:nth-child(2) { transition-delay: 70ms; }
+.reveal-ready .bullets.is-revealed > *:nth-child(2) { transition-delay: var(--reveal-step); }
 .reveal-ready .autogrid.is-revealed > *:nth-child(3),
 .reveal-ready .card.list.is-revealed > *:nth-child(3),
-.reveal-ready .bullets.is-revealed > *:nth-child(3) { transition-delay: 140ms; }
+.reveal-ready .bullets.is-revealed > *:nth-child(3) { transition-delay: calc(var(--reveal-step) * 2); }
 .reveal-ready .autogrid.is-revealed > *:nth-child(4),
 .reveal-ready .card.list.is-revealed > *:nth-child(4),
-.reveal-ready .bullets.is-revealed > *:nth-child(4) { transition-delay: 210ms; }
+.reveal-ready .bullets.is-revealed > *:nth-child(4) { transition-delay: calc(var(--reveal-step) * 3); }
 .reveal-ready .autogrid.is-revealed > *:nth-child(n+5),
 .reveal-ready .card.list.is-revealed > *:nth-child(n+5),
-.reveal-ready .bullets.is-revealed > *:nth-child(n+5) { transition-delay: 280ms; }
+.reveal-ready .bullets.is-revealed > *:nth-child(n+5) { transition-delay: calc(var(--reveal-step) * 4); }
 
 /* Le panneau de la règle d'or monte de plus loin : c'est une révélation,
    elle a droit à plus d'amplitude que le reste. */
-.reveal-ready .panel-gold { transform: translateY(28px) scale(.985); }
+.reveal-ready .panel-gold {
+  transform: translateY(calc(var(--reveal-shift) * 1.6)) scale(.96);
+  transition-duration: calc(var(--reveal-dur) * 1.2);
+}
 .reveal-ready .panel-gold.is-revealed { transform: none; }
 
+/* ---------- LE TITRE ----------
+   Chaque ligne monte derrière une fenêtre qui la découpe : le mot n'apparaît
+   pas, il entre. C'est le seul endroit de la page qui mérite ce traitement,
+   et il n'y a que deux lignes — au-delà l'effet devient un tic. */
+.hero h1 { position: relative; }
+.h1-line {
+  display: block;
+  overflow: hidden;
+  /* Anton descend sous la ligne de base et l'accent d'ÉDITION monte au-dessus :
+     la fenêtre est élargie des deux côtés, puis reprise en marge. */
+  padding: .12em 0 .1em;
+  margin: -.12em 0 -.1em;
+}
+.h1-line > span { display: block; }
+
+.reveal-ready .h1-line > span {
+  transform: translateY(110%);
+  animation: line-rise calc(var(--reveal-dur) * 1.25) var(--ease-reveal) forwards;
+  animation-delay: calc(300ms + var(--line-i) * var(--reveal-step) * 1.4);
+}
+@keyframes line-rise {
+  from { transform: translateY(110%); }
+  to   { transform: none; }
+}
+
+/* Une lueur dorée s'ouvre derrière le titre pendant qu'il monte, puis
+   retombe à un halo. Elle est en fond, sans effet sur la lisibilité. */
+.reveal-ready .hero h1::before {
+  content: '';
+  position: absolute;
+  inset: -25% -12%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(50% 50% at 50% 50%,
+              rgba(245,197,66,.30) 0%, rgba(245,197,66,.10) 45%, transparent 72%);
+  opacity: 0;
+  animation: bloom calc(var(--reveal-dur) * 2.4) var(--ease-reveal) 260ms forwards;
+}
+@keyframes bloom {
+  0%   { opacity: 0; transform: scale(.6); }
+  45%  { opacity: 1; transform: scale(1.04); }
+  100% { opacity: .4; transform: scale(1); }
+}
+
 /* ---------- OUVERTURE DU HERO ----------
-   Pas d'observateur ici : le hero est déjà à l'écran au chargement. Les
-   éléments se posent dans l'ordre de lecture. */
+   Pas d'observateur : le hero est déjà à l'écran au chargement. Les éléments
+   se posent dans l'ordre de lecture. */
 @keyframes rise {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(var(--reveal-shift)); }
   to   { opacity: 1; transform: none; }
 }
 @keyframes glow-in {
-  from { opacity: 0; transform: translateY(20px) scale(.96); box-shadow: none; }
+  from { opacity: 0; transform: translateY(var(--reveal-shift)) scale(.94); box-shadow: none; }
   to   { opacity: 1; transform: none; box-shadow: var(--shadow-gold-glow); }
 }
 .reveal-ready .hero > * {
   opacity: 0;
-  animation: rise var(--dur-slow) var(--ease-out) forwards;
+  animation: rise var(--reveal-dur) var(--ease-reveal) forwards;
 }
-.reveal-ready .hero > *:nth-child(1) { animation-delay: 60ms; }
-.reveal-ready .hero > *:nth-child(2) { animation-delay: 160ms; }
-.reveal-ready .hero > *:nth-child(3) { animation-delay: 300ms; }
-.reveal-ready .hero > *:nth-child(4) { animation-delay: 420ms; }
-.reveal-ready .hero > *:nth-child(5) { animation-delay: 520ms; }
-.reveal-ready .hero > *:nth-child(6) { animation-delay: 620ms; }
-/* Le décompte est le point d'arrivée du regard : sa lueur s'allume avec lui. */
+.reveal-ready .hero > *:nth-child(1) { animation-delay: 80ms; }
+.reveal-ready .hero > *:nth-child(2) { animation-delay: 200ms; }
+.reveal-ready .hero > *:nth-child(3) { animation-delay: 900ms; }
+.reveal-ready .hero > *:nth-child(4) { animation-delay: 1080ms; }
+.reveal-ready .hero > *:nth-child(5) { animation-delay: 1240ms; }
+.reveal-ready .hero > *:nth-child(6) { animation-delay: 1400ms; }
+/* Le décompte est le point d'arrivée du regard : sa lueur s'allume avec lui,
+   une fois le titre entièrement monté. */
 .reveal-ready .hero .cd-grid {
-  animation: glow-in var(--dur-slow) var(--ease-out) 420ms backwards;
+  animation: glow-in calc(var(--reveal-dur) * 1.3) var(--ease-reveal) 900ms backwards;
 }
-
 
 /* Rien de tout cela n'ajoute d'information : sans les animations, la page est
    identique, simplement déjà en place. */
 @media (prefers-reduced-motion: reduce) {
   .reveal-ready .hero > *,
-  .reveal-ready .hero .cd-grid { animation: none; opacity: 1; }
+  .reveal-ready .hero h1::before,
+  .reveal-ready .h1-line > span,
+  .reveal-ready .hero .cd-grid { animation: none; opacity: 1; transform: none; }
 }
