@@ -109,26 +109,43 @@ export function playPerfect() {
   })
 }
 
-/** Le coup manqué : sec, court, sans le poids du tir. On entend qu'il n'y a
- *  rien eu au bout. */
+/** Le coup manqué. Il ne doit pas être un tir en plus sourd : joué à côté du
+ *  coup qui touche, on entendrait la même salve de bruit et l'oreille conclurait
+ *  à un problème de volume. C'est donc un autre geste — un déclic mécanique,
+ *  sec et métallique, sans une once de grave. On entend le mécanisme, pas le
+ *  départ du coup. */
 export function playMiss() {
   const c = audio()
   if (!c) return
   if (c.state === 'suspended') c.resume()
   const t = c.currentTime
 
+  // le métal : une salve très brève, tout en haut du spectre
   const src = c.createBufferSource()
   src.buffer = noiseBuffer(c)
-  const bp = c.createBiquadFilter()
-  bp.type = 'bandpass'
-  bp.frequency.setValueAtTime(900, t)
-  bp.frequency.exponentialRampToValueAtTime(240, t + 0.05)
-  bp.Q.value = 2.4
-  src.connect(bp)
-  const { g, stopAt } = env(c, bp, 0.14, 0.003, 0.055)
-  g.connect(c.destination)
-  src.start(t)
-  src.stop(stopAt)
+  const hp = c.createBiquadFilter()
+  hp.type = 'highpass'
+  hp.frequency.value = 3800
+  src.connect(hp)
+  const g1 = c.createGain()
+  g1.gain.setValueAtTime(0.0001, t)
+  g1.gain.exponentialRampToValueAtTime(0.2, t + 0.001)
+  g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.028)
+  hp.connect(g1); g1.connect(c.destination)
+  src.start(t); src.stop(t + 0.05)
+
+  // le corps du déclic : un carré court, aigu, qui ne descend jamais dans les
+  // graves — c'est ce qui le sépare du tir à l'oreille
+  const osc = c.createOscillator()
+  osc.type = 'square'
+  osc.frequency.setValueAtTime(1450, t)
+  osc.frequency.exponentialRampToValueAtTime(760, t + 0.03)
+  const g2 = c.createGain()
+  g2.gain.setValueAtTime(0.0001, t)
+  g2.gain.exponentialRampToValueAtTime(0.075, t + 0.002)
+  g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.045)
+  osc.connect(g2); g2.connect(c.destination)
+  osc.start(t); osc.stop(t + 0.07)
 }
 
 /** La défaite : deux notes qui descendent. */
