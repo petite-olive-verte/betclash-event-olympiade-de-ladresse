@@ -37,8 +37,12 @@ src/
 Le titre s'appelle « Olympiade de l'adresse », alors on peut lui tirer dessus :
 un viseur suit la souris, un clic dégomme une lettre. Au premier tir le reste
 du hero s'efface, les lettres se rassemblent au centre de l'écran et s'en
-dispersent — de plus en plus vite à mesure qu'elles tombent, jusqu'à la
-dernière. Une flèche sur le côté remet la page comme avant.
+dispersent — de plus en plus vite à mesure qu'elles tombent.
+
+Le chargeur est limité : une balle par coup, touché ou manqué. Toutes les
+lettres à terre, c'est « Bravo » et le décompte jusqu'au jour J ; le chargeur
+vide avant, c'est « Bouu ». Les deux proposent de reprendre la lecture, et une
+flèche sur le côté remet la page comme avant à tout moment.
 
 Le jeu ne se déclenche qu'au clic, le titre garde son nom accessible, et sans
 souris, sans JS ou sous `prefers-reduced-motion`, il reste un titre.

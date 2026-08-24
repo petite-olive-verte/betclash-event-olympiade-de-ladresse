@@ -140,14 +140,29 @@
   align-items: center;
   gap: var(--sp-3);
 }
-.range-count {
+.range-gauge {
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
   font-family: var(--font-display);
   font-size: var(--text-lg);
   color: var(--moment-gold);
   line-height: 1;
 }
-.range-count span { font-size: var(--text-xs); color: var(--text-muted); }
+.range-gauge .tnum span { font-size: var(--text-xs); color: var(--text-muted); }
+.range-tag {
+  font-family: var(--font-body);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-muted);
+}
+/* Les trois dernières balles se signalent : c'est le moment où le joueur doit
+   arrêter d'arroser. */
+.range-gauge.is-low .tnum { color: var(--market-down); animation: pulse 900ms ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .45 } }
 .range-icon {
   display: flex;
   align-items: center;
@@ -199,4 +214,98 @@
   .range.is-playing .hero > *:not(:nth-child(2)),
   .range.is-playing .kicker,
   .range.is-playing .tagline { transition: none; }
+}
+
+/* ═══════════════════════════════════════════════════════ FIN DE PARTIE */
+.range-end {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-6);
+  cursor: auto;
+  background: radial-gradient(60% 60% at 50% 45%, rgba(58,26,82,.82) 0%, rgba(11,13,18,.92) 100%);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: veil var(--dur-slow) var(--ease-out) backwards;
+}
+@keyframes veil { from { opacity: 0 } to { opacity: 1 } }
+
+.range-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-5);
+  text-align: center;
+  max-width: 560px;
+  animation: card-in calc(var(--dur-slow) * 1.6) cubic-bezier(.2,.8,.25,1) 120ms backwards;
+}
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(28px) scale(.94) }
+  to   { opacity: 1; transform: none }
+}
+
+/* Le verdict monte lettre par lettre derrière une fenêtre qui le découpe —
+   même geste que le titre au chargement, pour que la fin réponde au début. */
+.range-verdict {
+  margin: 0;
+  display: flex;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: var(--display-lg);
+  line-height: var(--lh-tight);
+  color: var(--moment-gold);
+}
+.verdict-l {
+  display: inline-block;
+  animation: verdict-rise calc(var(--dur-slow) * 1.7) cubic-bezier(.2,.9,.2,1) backwards;
+  animation-delay: calc(240ms + var(--l) * 90ms);
+}
+@keyframes verdict-rise {
+  from { opacity: 0; transform: translateY(90%) rotate(-8deg) }
+  to   { opacity: 1; transform: none }
+}
+/* La classe vit sur le stand, pas sur le verdict : `.range-win` ne
+   correspondait à rien et « Bouu » restait doré. */
+.range.is-win .range-verdict { text-shadow: 0 0 42px rgba(245,197,66,.55); }
+.range.is-lose .range-verdict {
+  color: var(--market-down);
+  text-shadow: 0 0 42px rgba(255,95,95,.4);
+}
+
+.range-line {
+  margin: 0;
+  font-size: var(--text-md);
+  color: var(--text);
+  max-width: 34ch;
+  animation: rise-sm var(--dur-slow) var(--ease-out) 620ms backwards;
+}
+.range-line-sub { font-size: var(--text-sm); color: var(--text-muted); }
+.range-card > :nth-child(3) { animation: rise-sm var(--dur-slow) var(--ease-out) 760ms backwards; }
+.range-actions {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: rise-sm var(--dur-slow) var(--ease-out) 900ms backwards;
+}
+@keyframes rise-sm { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
+
+.range-again { display: inline-flex; align-items: center; gap: var(--sp-2); }
+
+/* Le viseur n'a plus rien à viser une fois la partie finie. */
+.range.is-win .crosshair, .range.is-lose .crosshair { opacity: 0 !important; }
+.range.is-win, .range.is-lose { cursor: auto !important; }
+
+@media (max-width: 620px) {
+  .range-verdict { font-size: var(--display-md); }
+  .range-card { gap: var(--sp-4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .range-end, .range-card, .verdict-l, .range-line,
+  .range-card > :nth-child(3), .range-actions { animation: none; }
+  .range-gauge.is-low .tnum { animation: none; }
 }

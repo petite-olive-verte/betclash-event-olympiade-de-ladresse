@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { RotateCcw } from 'lucide-react'
-import { playPerfect, playReload, playShot } from './shotSound.js'
+import { Crosshair, RotateCcw } from 'lucide-react'
+import { Button, Countdown } from '../ds'
+import { event } from './content.jsx'
+import { playFail, playMiss, playPerfect, playReload, playShot } from './shotSound.js'
 import './shooting.css'
 
 const RangeCtx = createContext(null)
@@ -27,6 +29,10 @@ const SPEED_MAX = 460     // px/s sur la dernière lettre
 const BURST = 4.5         // multiplicateur au premier instant
 const BURST_TAU = 0.34    // s — constante d'amortissement
 
+// Six balles de marge sur vingt lettres : de quoi rater sans que la partie
+// soit jouée d'avance, et pas de quoi arroser jusqu'à ce que ça tombe.
+const MARGE = 6
+
 export function ShootingRange({ children }) {
   const [hits, setHits] = useState(() => new Set())
   const [playing, setPlaying] = useState(false)
@@ -34,6 +40,8 @@ export function ShootingRange({ children }) {
   const [open, setOpen] = useState(false)
   const [muted, setMuted] = useState(readMuted)
   const [total, setTotal] = useState(0)
+  const [ammo, setAmmo] = useState(0)
+  const [outcome, setOutcome] = useState(null)   // null | 'win' | 'lose'
 
   const hostRef = useRef(null)
   const aimRaf = useRef(0)
@@ -43,7 +51,10 @@ export function ShootingRange({ children }) {
 
   useEffect(() => {
     const host = hostRef.current
-    if (host) setTotal(host.querySelectorAll('.h1-char').length)
+    if (!host) return
+    const n = host.querySelectorAll('.h1-char').length
+    setTotal(n)
+    setAmmo(n + MARGE)
   }, [])
 
   // Les lignes du titre montent derrière une fenêtre qui les découpe. Tant
@@ -166,36 +177,71 @@ export function ShootingRange({ children }) {
   }, [])
 
   /* ----------------------------------------------------------- LE TIR */
-  const shoot = useCallback((id, index) => {
-    // La décision se prend sur l'état rendu, jamais depuis l'updater : un
-    // updater doit être pur, React ne l'exécute pas forcément sur-le-champ et
-    // le double-invoque en mode strict. Une variable posée dedans et relue
-    // juste après est fausse une fois sur deux, et le tir part muet.
-    if (hits.has(id)) return
+  const fire = useCallback((e) => {
+    // Avant le premier coup la page est normale : seuls les liens et les
+    // boutons répondent, et seul un clic sur une lettre ouvre la partie.
+    const letter = e.target.closest?.('.h1-char')
+    if (!playing && !letter) return
+    if (outcome) return
+    // Le panneau latéral et l'écran de fin ne sont pas le champ de tir.
+    if (e.target.closest?.('.range-side, .range-end')) return
+
+    const id = letter && !letter.classList.contains('is-hit')
+      ? letter.dataset.id
+      : null
 
     if (!playing) { release(); setPlaying(true) }
-
-    const next = new Set(hits)
-    next.add(id)
-    setHits(next)
-    ratioRef.current = total ? next.size / total : 0
-
-    const mote = motesRef.current[index]
-    if (mote) mote.down = true
-
     recoil()
-    if (!muted) playShot()
-    if (total && next.size >= total && !muted) playPerfect()
-  }, [hits, muted, playing, release, total])
 
-  const reload = () => {
+    const left = ammo - 1
+    setAmmo(left)
+
+    if (id) {
+      const next = new Set(hits)
+      next.add(id)
+      setHits(next)
+      ratioRef.current = total ? next.size / total : 0
+      const mote = motesRef.current[Number(id.slice(1))]
+      if (mote) mote.down = true
+      if (!muted) playShot()
+
+      if (total && next.size >= total) {
+        setOutcome('win')
+        if (!muted) playPerfect()
+      } else if (left <= 0) {
+        setOutcome('lose')
+        if (!muted) playFail()
+      }
+      return
+    }
+
+    // Coup manqué : la balle part quand même.
+    if (!muted) playMiss()
+    if (left <= 0) {
+      setOutcome('lose')
+      if (!muted) playFail()
+    }
+  }, [ammo, hits, muted, outcome, playing, release, total])
+
+  const reload = useCallback((silencieux) => {
     // Rien à défaire : les lettres reprennent leur place dès que `is-playing`
     // tombe, puisque c'est le CSS qui les détachait.
     motesRef.current = []
     ratioRef.current = 0
     setHits(new Set())
     setPlaying(false)
-    if (!muted) playReload()
+    setOutcome(null)
+    setAmmo(total + MARGE)
+    if (!muted && !silencieux) playReload()
+  }, [muted, total])
+
+  // « Lire la suite » : on rend la page telle qu'elle était et on amène le
+  // lecteur là où il allait avant qu'on lui propose de jouer.
+  const resume = () => {
+    reload(true)
+    requestAnimationFrame(() => {
+      document.getElementById('bref')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    })
   }
 
   const toggleMute = () => setMuted((m) => {
@@ -204,16 +250,18 @@ export function ShootingRange({ children }) {
     return next
   })
 
-  const done = total > 0 && hits.size >= total
+
+  const restantes = total - hits.size
 
   return (
-    <RangeCtx.Provider value={{ hits, shoot }}>
+    <RangeCtx.Provider value={{ hits, fire }}>
       <div
         ref={hostRef}
         className={`range${armed ? ' is-armed' : ''}${open ? ' is-open' : ''}`
-          + `${playing ? ' is-playing' : ''}${done ? ' is-done' : ''}`}
+          + `${playing ? ' is-playing' : ''}${outcome ? ` is-${outcome}` : ''}`}
         onPointerMove={(e) => { if (e.pointerType === 'mouse') { setArmed(true); track(e) } }}
         onPointerLeave={() => setArmed(false)}
+        onPointerDown={fire}
       >
         {children}
 
@@ -222,12 +270,19 @@ export function ShootingRange({ children }) {
           <span className="tick b" /><span className="tick l" /><span className="dot" />
         </div>
 
-        {/* Le panneau latéral n'existe qu'une fois la partie lancée : avant, le
-            hero n'a pas à porter l'interface d'un jeu que personne n'a ouvert. */}
+        {/* Le panneau n'existe qu'une fois la partie lancée : avant, le hero
+            n'a pas à porter l'interface d'un jeu que personne n'a ouvert. */}
         {playing && (
           <div className="range-side">
-            <p className="range-count tnum">{hits.size}<span>/{total}</span></p>
-            <button type="button" className="range-icon" onClick={reload}
+            <p className="range-gauge">
+              <span className="tnum">{hits.size}<span>/{total}</span></span>
+              <span className="range-tag">lettres</span>
+            </p>
+            <p className={`range-gauge${ammo <= 3 ? ' is-low' : ''}`}>
+              <span className="tnum">{Math.max(ammo, 0)}</span>
+              <span className="range-tag">balles</span>
+            </p>
+            <button type="button" className="range-icon" onClick={() => reload()}
                     title="Remettre la page comme avant" aria-label="Remettre la page comme avant">
               <RotateCcw size={20} strokeWidth={1.75} absoluteStrokeWidth aria-hidden="true" />
             </button>
@@ -236,7 +291,45 @@ export function ShootingRange({ children }) {
                     aria-label={muted ? 'Rétablir le son' : 'Couper le son'}>
               {muted ? '🔇' : '🔊'}
             </button>
-            {done && <p className="range-done">Carton plein</p>}
+          </div>
+        )}
+
+        {outcome && (
+          <div className="range-end" role="dialog" aria-modal="true" aria-labelledby="fin-titre">
+            <div className="range-card">
+              <p className="range-verdict" id="fin-titre">
+                {(outcome === 'win' ? 'Bravo' : 'Bouu').split('').map((c, i) => (
+                  <span key={i} className="verdict-l" style={{ '--l': i }}>{c}</span>
+                ))}
+              </p>
+
+              <p className="range-line">
+                {outcome === 'win'
+                  ? <>Tu es déjà prêt pour le jour J.</>
+                  : <>Il va falloir encore t'entraîner. Il ne te reste que&nbsp;:</>}
+              </p>
+
+              <Countdown target={event.startsAt} variant="hero"
+                         label={outcome === 'win' ? 'Il reste' : 'Pour te refaire'} />
+
+              {outcome === 'lose' && (
+                <p className="range-line range-line-sub">
+                  {restantes === 1
+                    ? 'Une lettre est restée debout.'
+                    : `${restantes} lettres sont restées debout.`}
+                </p>
+              )}
+
+              <div className="range-actions">
+                <Button variant="primary" size="lg" onClick={resume}>Lire la suite</Button>
+                <Button variant="ghost" size="lg" onClick={() => reload()}>
+                  <span className="range-again">
+                    <Crosshair size={17} strokeWidth={1.75} absoluteStrokeWidth aria-hidden="true" />
+                    {outcome === 'win' ? 'Rejouer' : 'Une autre partie'}
+                  </span>
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -261,11 +354,14 @@ export function ShootableTitle({ lines }) {
               i < 0 ? (
                 <span key={ci} className="h1-space"> </span>
               ) : (
+                // Pas de gestionnaire ici : le tir est écouté par le stand,
+                // seul endroit d'où l'on puisse voir qu'un coup n'a rien
+                // touché.
                 <span
                   key={ci}
+                  data-id={`c${i}`}
                   className={`h1-char${range?.hits.has(`c${i}`) ? ' is-hit' : ''}`}
                   style={spray(i)}
-                  onPointerDown={() => range?.shoot(`c${i}`, i)}
                 >
                   {ch}
                 </span>

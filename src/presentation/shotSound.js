@@ -108,3 +108,45 @@ export function playPerfect() {
     osc.start(t); osc.stop(t + 0.6)
   })
 }
+
+/** Le coup manqué : sec, court, sans le poids du tir. On entend qu'il n'y a
+ *  rien eu au bout. */
+export function playMiss() {
+  const c = audio()
+  if (!c) return
+  if (c.state === 'suspended') c.resume()
+  const t = c.currentTime
+
+  const src = c.createBufferSource()
+  src.buffer = noiseBuffer(c)
+  const bp = c.createBiquadFilter()
+  bp.type = 'bandpass'
+  bp.frequency.setValueAtTime(900, t)
+  bp.frequency.exponentialRampToValueAtTime(240, t + 0.05)
+  bp.Q.value = 2.4
+  src.connect(bp)
+  const { g, stopAt } = env(c, bp, 0.14, 0.003, 0.055)
+  g.connect(c.destination)
+  src.start(t)
+  src.stop(stopAt)
+}
+
+/** La défaite : deux notes qui descendent. */
+export function playFail() {
+  const c = audio()
+  if (!c) return
+  if (c.state === 'suspended') c.resume()
+  ;[0, 0.16].forEach((delay, i) => {
+    const osc = c.createOscillator()
+    osc.type = 'triangle'
+    const t = c.currentTime + delay
+    osc.frequency.setValueAtTime([329.63, 246.94][i], t)
+    osc.frequency.exponentialRampToValueAtTime([246.94, 155.56][i], t + (i ? 0.5 : 0.14))
+    const g = c.createGain()
+    g.gain.setValueAtTime(0.0001, t)
+    g.gain.exponentialRampToValueAtTime(0.2, t + 0.012)
+    g.gain.exponentialRampToValueAtTime(0.0001, t + (i ? 0.6 : 0.16))
+    osc.connect(g); g.connect(c.destination)
+    osc.start(t); osc.stop(t + 0.7)
+  })
+}
