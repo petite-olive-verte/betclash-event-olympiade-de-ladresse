@@ -171,6 +171,36 @@ export function ShootingRange({ children }) {
     return () => cancelAnimationFrame(driftRaf.current)
   }, [playing])
 
+  // Tant que la partie court, la page ne défile pas : les lettres sont
+  // ancrées à la fenêtre et le décor a disparu, donc défiler ne montrerait
+  // qu'un vide et ferait perdre le fil du jeu.
+  //
+  // `overflow: hidden` sur la racine ne suffit pas — iOS continue de faire
+  // glisser le corps de la page au doigt. Le seul verrou qui tienne partout
+  // est de figer le corps et de compenser le défilement en cours, puis de le
+  // rendre tel quel à la sortie.
+  useEffect(() => {
+    if (!playing) return
+    const y = window.scrollY
+    const body = document.body
+    const memoire = {
+      position: body.style.position, top: body.style.top,
+      left: body.style.left, right: body.style.right, width: body.style.width,
+    }
+    body.style.position = 'fixed'
+    body.style.top = `-${y}px`
+    body.style.left = '0'
+    body.style.right = '0'
+    body.style.width = '100%'
+
+    return () => {
+      Object.assign(body.style, memoire)
+      // `scroll-behavior: smooth` est posé sur la page : sans `instant`, le
+      // retour à la position d'origine se ferait en glissant.
+      window.scrollTo({ top: y, behavior: 'instant' })
+    }
+  }, [playing])
+
   useEffect(() => () => {
     cancelAnimationFrame(aimRaf.current)
     cancelAnimationFrame(driftRaf.current)
@@ -239,9 +269,12 @@ export function ShootingRange({ children }) {
   // lecteur là où il allait avant qu'on lui propose de jouer.
   const resume = () => {
     reload(true)
-    requestAnimationFrame(() => {
+    // Deux images d'attente : la première laisse React démonter la partie, la
+    // seconde laisse le nettoyage rendre le défilement. Viser la section avant
+    // ça reviendrait à défiler une page encore figée.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
       document.getElementById('bref')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
+    }))
   }
 
   const toggleMute = () => setMuted((m) => {

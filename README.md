@@ -44,6 +44,10 @@ lettres à terre, c'est « Oh wow » et le décompte jusqu'au jour J ; le charge
 vide avant, c'est « Bouu ». Les deux proposent de reprendre la lecture, et une
 flèche sur le côté remet la page comme avant à tout moment.
 
+Le temps d'une partie la page ne défile plus : les lettres sont ancrées à la
+fenêtre et le décor a disparu, défiler ne montrerait qu'un vide. Le défilement
+est rendu, à la position exacte où il avait été pris, dès qu'on quitte.
+
 Le jeu ne se déclenche qu'au clic, le titre garde son nom accessible, et sans
 souris, sans JS ou sous `prefers-reduced-motion`, il reste un titre.
 
