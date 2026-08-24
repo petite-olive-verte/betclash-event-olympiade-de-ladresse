@@ -71,9 +71,42 @@
   h1 .l2{color:var(--gold); display:block}
   .tagline{color:var(--muted); font-size:17px; max-width:440px; margin:0 auto; text-wrap:balance}
 
+  .cd-label{
+    font-size:11px; font-weight:700; letter-spacing:.17em;
+    text-transform:uppercase; color:var(--muted);
+    margin:32px 0 11px;
+  }
+  .countdown{
+    display:flex; max-width:380px; margin:0 auto;
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:14px; overflow:hidden;
+  }
+  .cd-cell{flex:1; padding:14px 4px}
+  .cd-cell + .cd-cell{border-left:1px solid var(--line)}
+  .cd-cell b{
+    display:block; font-family:'Anton',sans-serif; font-weight:400;
+    font-size:30px; line-height:1; color:var(--gold);
+    font-variant-numeric:tabular-nums;
+  }
+  .cd-cell span{
+    display:block; font-size:10px; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--muted); margin-top:6px;
+  }
+  .cd-done{
+    max-width:380px; margin:30px auto 0; padding:17px 16px;
+    border:1px solid rgba(245,197,66,.45);
+    background:linear-gradient(160deg, rgba(245,197,66,.14), rgba(245,197,66,.04));
+    border-radius:14px;
+    font-family:'Anton',sans-serif; font-size:21px;
+    text-transform:uppercase; color:var(--gold); line-height:1.15;
+  }
+  .sr-only{
+    position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
   .stats{
     display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
-    max-width:var(--wrap); margin:36px auto 0; padding:0 20px;
+    max-width:var(--wrap); margin:44px auto 0; padding:0 20px;
   }
   .stat{
     background:var(--surface); border:1px solid var(--line);
@@ -231,9 +264,16 @@
 
 <header class="hero">
   <div class="wrap">
-    <span class="kicker">Édition 2 · Deux jours</span>
+    <span class="kicker">Édition 2 · 10 &amp; 11 octobre</span>
     <h1>Olympiade<span class="l2">de l'adresse</span></h1>
     <p class="tagline">Des duels, des équipes, des paris. Cinq titres à prendre, et une seule règle qui compte vraiment.</p>
+    <p class="cd-label">Il reste</p>
+    <div id="countdown" class="countdown" role="timer" aria-hidden="true">
+      <div class="cd-cell"><b id="cd-d">—</b><span>jours</span></div>
+      <div class="cd-cell"><b id="cd-h">—</b><span>heures</span></div>
+      <div class="cd-cell"><b id="cd-m">—</b><span>minutes</span></div>
+    </div>
+    <p class="sr-only">L'olympiade a lieu le samedi 10 et le dimanche 11 octobre 2026.</p>
   </div>
   <div class="stats">
     <div class="stat"><b>2</b><span>jours</span></div>
@@ -289,7 +329,7 @@
   <section id="samedi">
     <div class="sec-head"><span class="num">02</span><h2>Samedi — les duels</h2></div>
     <p class="sub">Un contre un, cinq tours, tout le monde joue jusqu'au bout.</p>
-    <span class="day">Jour 1</span>
+    <span class="day">Jour 1 · samedi 10 octobre</span>
 
     <p>On joue en <strong>système suisse</strong> : à chaque tour, l'appli t'apparie avec quelqu'un qui a à peu près ton niveau, sur un jeu que tu n'as pas encore fait. <strong>Personne n'est éliminé</strong>, tout le monde joue les cinq tours.</p>
     <p>Un duel se joue en <strong>deux manches gagnantes</strong>.</p>
@@ -359,7 +399,7 @@ gain = ta mise × la cote</div>
   <section id="dimanche">
     <div class="sec-head"><span class="num">04</span><h2>Dimanche — les équipes</h2></div>
     <p class="sub">Chacune contre toutes, et celle qui se repose tient le marché.</p>
-    <span class="day">Jour 2</span>
+    <span class="day">Jour 2 · dimanche 11 octobre</span>
 
     <p>Chaque équipe affronte toutes les autres. À chaque match, <strong>au moins une équipe ne joue pas</strong> : c'est elle le public, et <strong>c'est elle qui parie.</strong></p>
     <p>Ce n'est pas un détail d'organisation. Une équipe qui parie sur un match qu'elle ne dispute pas ne peut pas en influencer le résultat — le marché reste propre par construction, sans qu'on ait besoin d'une seule règle en plus.</p>
@@ -465,6 +505,46 @@ gain = ta mise × la cote</div>
   <div class="big">Olympiade de l'adresse</div>
   <p>Édition 2 · Le règlement peut encore bouger d'ici le jour J.<br>Les questions et les contestations, c'est dans le groupe.</p>
 </footer>
+
+<script>
+(function () {
+  var START = new Date('2026-10-10T10:00:00+02:00').getTime();
+  var END   = new Date('2026-10-12T00:00:00+02:00').getTime();
+  var el = document.getElementById('countdown');
+  var label = document.querySelector('.cd-label');
+  var d = document.getElementById('cd-d');
+  var h = document.getElementById('cd-h');
+  var m = document.getElementById('cd-m');
+  if (!el || !d) return;
+  var timer, finished = false;
+
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+
+  function stop(message) {
+    finished = true;
+    if (timer) clearInterval(timer);
+    if (label) label.style.display = 'none';
+    el.className = 'cd-done';
+    el.removeAttribute('role');
+    el.removeAttribute('aria-hidden');
+    el.textContent = message;
+  }
+
+  function tick() {
+    if (finished) return;
+    var now = Date.now();
+    if (now >= END) return stop('L\u2019olympiade a eu lieu');
+    if (now >= START) return stop('C\u2019est maintenant');
+    var mins = Math.floor((START - now) / 60000);
+    d.textContent = Math.floor(mins / 1440);
+    h.textContent = pad(Math.floor(mins / 60) % 24);
+    m.textContent = pad(mins % 60);
+  }
+
+  tick();
+  timer = setInterval(tick, 1000);
+})();
+</script>
 
 </body>
 </html>
