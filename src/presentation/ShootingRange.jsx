@@ -1,0 +1,279 @@
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { RotateCcw } from 'lucide-react'
+import { playPerfect, playReload, playShot } from './shotSound.js'
+import './shooting.css'
+
+const RangeCtx = createContext(null)
+
+const MUTE_KEY = 'olympiade:stand-muet'
+const readMuted = () => { try { return localStorage.getItem(MUTE_KEY) === '1' } catch { return false } }
+
+// Trajectoire de chute déterministe : la même lettre part toujours du même
+// côté. Tirée au sort à chaque rendu, elle ferait sauter les débris en vol.
+function spray(i) {
+  const n = Math.sin((i + 1) * 12.9898) * 43758.5453
+  const r = n - Math.floor(n)
+  return { '--fly-x': `${(r - 0.5) * 220}px`, '--fly-r': `${(r - 0.5) * 120}deg`, '--fly-d': `${420 + r * 240}ms` }
+}
+
+// Plus il reste peu de lettres, plus elles filent. Le dernier tir se mérite.
+const SPEED_MIN = 95      // px/s au premier tir
+const SPEED_MAX = 460     // px/s sur la dernière lettre
+
+// Parties du même point, les lettres forment un pâté blanc et restent
+// indistinctes plusieurs secondes à vitesse de croisière. Une détente initiale
+// les écarte d'un coup, puis s'éteint : on voit une dispersion, et le jeu
+// retrouve tout de suite un rythme jouable.
+const BURST = 4.5         // multiplicateur au premier instant
+const BURST_TAU = 0.34    // s — constante d'amortissement
+
+export function ShootingRange({ children }) {
+  const [hits, setHits] = useState(() => new Set())
+  const [playing, setPlaying] = useState(false)
+  const [armed, setArmed] = useState(false)
+  const [open, setOpen] = useState(false)
+  const [muted, setMuted] = useState(readMuted)
+  const [total, setTotal] = useState(0)
+
+  const hostRef = useRef(null)
+  const aimRaf = useRef(0)
+  const driftRaf = useRef(0)
+  const motesRef = useRef([])       // une entrée par lettre encore debout
+  const ratioRef = useRef(0)        // part de lettres abattues, lue par la boucle
+
+  useEffect(() => {
+    const host = hostRef.current
+    if (host) setTotal(host.querySelectorAll('.h1-char').length)
+  }, [])
+
+  // Les lignes du titre montent derrière une fenêtre qui les découpe. Tant
+  // qu'elle découpe, une lettre qui s'échappe est coupée net : on ne rouvre
+  // qu'une fois l'entrée terminée — sur `animationend` plutôt qu'après un
+  // délai deviné, qui dériverait avec le chargement des polices.
+  useEffect(() => {
+    const host = hostRef.current
+    if (!host) return
+    const inners = host.querySelectorAll('.h1-line > span')
+    if (!inners.length) return setOpen(true)
+    let left = inners.length
+    const done = () => { if (--left <= 0) setOpen(true) }
+    for (const el of inners) {
+      if (!el.getAnimations().length) return setOpen(true)
+      el.addEventListener('animationend', done, { once: true })
+    }
+    return () => { for (const el of inners) el.removeEventListener('animationend', done) }
+  }, [])
+
+  /* ---------------------------------------------------------- LE VISEUR */
+  // Écrit en propriétés CSS, jamais dans un état React : un rendu par pixel
+  // parcouru relancerait tout le hero.
+  const track = useCallback((e) => {
+    const host = hostRef.current
+    if (!host) return
+    cancelAnimationFrame(aimRaf.current)
+    const { clientX, clientY } = e
+    aimRaf.current = requestAnimationFrame(() => {
+      const r = host.getBoundingClientRect()
+      host.style.setProperty('--aim-x', `${clientX - r.left}px`)
+      host.style.setProperty('--aim-y', `${clientY - r.top}px`)
+    })
+  }, [])
+
+  const recoil = () => {
+    const host = hostRef.current
+    if (!host) return
+    host.classList.remove('is-firing')
+    void host.offsetWidth
+    host.classList.add('is-firing')
+  }
+
+  /* ------------------------------------------------- LES LETTRES LÂCHÉES */
+  // Au premier tir, chaque lettre est détachée à l'endroit exact où elle se
+  // trouve : `position: fixed` aux coordonnées mesurées. Rien ne saute, mais
+  // elles cessent d'appartenir au titre et peuvent parcourir tout l'écran.
+  const release = useCallback(() => {
+    const host = hostRef.current
+    if (!host) return
+    const motes = []
+    const count = host.querySelectorAll('.h1-char').length
+    // Toutes les lettres se rassemblent au centre de l'écran, puis s'en
+    // écartent chacune dans sa direction. Elles ne partent pas de leur place
+    // dans le titre : le jeu commence par une dispersion, pas par un titre qui
+    // se met doucement à flotter.
+    const cx = window.innerWidth / 2
+    const cy = window.innerHeight / 2
+    for (const el of host.querySelectorAll('.h1-char')) {
+      const r = el.getBoundingClientRect()
+      // Seules les mesures sont écrites ici. Le détachement lui-même est une
+      // règle CSS conditionnée à `is-playing` : quitter la partie suffit alors
+      // à tout remettre en place, sans avoir à défaire un style à la main.
+      el.style.setProperty('--w', `${r.width}px`)
+      el.style.setProperty('--h', `${r.height}px`)
+      // Réparties sur le tour d'un cercle plutôt qu'au hasard : tirées au
+      // sort, plusieurs lettres partiraient dans la même direction et le
+      // paquet mettrait longtemps à se défaire.
+      const i = motes.length
+      const angle = (i / count) * Math.PI * 2 + 0.4
+      // À vitesse égale et angles réguliers, les lettres dessinent un anneau
+      // parfait — joli une seconde, puis figé. Un facteur propre à chaque
+      // lettre casse la figure sans la rendre illisible.
+      const a = Math.sin((i + 1) * 91.7) * 43758.5453
+      const k = 0.6 + (a - Math.floor(a)) * 0.85
+      const x = cx - r.width / 2
+      const y = cy - r.height / 2
+      el.style.setProperty('--x', `${x}px`)
+      el.style.setProperty('--y', `${y}px`)
+      motes.push({ el, x, y, w: r.width, h: r.height, k,
+                   dx: Math.cos(angle), dy: Math.sin(angle), down: false })
+    }
+    motesRef.current = motes
+  }, [])
+
+  useEffect(() => {
+    if (!playing) return
+    // Le mouvement n'est pas porteur d'information : sous mouvement réduit les
+    // lettres restent en place, et le jeu se joue sur des cibles fixes.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+    const t0 = performance.now()
+    let last = t0
+    const step = (now) => {
+      const dt = Math.min((now - last) / 1000, 0.05)   // un onglet en arrière-plan
+      last = now                                        // ne doit pas téléporter
+      const burst = 1 + (BURST - 1) * Math.exp(-(now - t0) / 1000 / BURST_TAU)
+      const speed = (SPEED_MIN + (SPEED_MAX - SPEED_MIN) * ratioRef.current) * burst
+      const W = window.innerWidth, H = window.innerHeight
+      for (const m of motesRef.current) {
+        if (m.down) continue
+        m.x += m.dx * speed * m.k * dt
+        m.y += m.dy * speed * m.k * dt
+        if (m.x <= 0) { m.x = 0; m.dx = Math.abs(m.dx) }
+        if (m.x + m.w >= W) { m.x = W - m.w; m.dx = -Math.abs(m.dx) }
+        if (m.y <= 0) { m.y = 0; m.dy = Math.abs(m.dy) }
+        if (m.y + m.h >= H) { m.y = H - m.h; m.dy = -Math.abs(m.dy) }
+        m.el.style.setProperty('--x', `${m.x}px`)
+        m.el.style.setProperty('--y', `${m.y}px`)
+      }
+      driftRaf.current = requestAnimationFrame(step)
+    }
+    driftRaf.current = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(driftRaf.current)
+  }, [playing])
+
+  useEffect(() => () => {
+    cancelAnimationFrame(aimRaf.current)
+    cancelAnimationFrame(driftRaf.current)
+  }, [])
+
+  /* ----------------------------------------------------------- LE TIR */
+  const shoot = useCallback((id, index) => {
+    // La décision se prend sur l'état rendu, jamais depuis l'updater : un
+    // updater doit être pur, React ne l'exécute pas forcément sur-le-champ et
+    // le double-invoque en mode strict. Une variable posée dedans et relue
+    // juste après est fausse une fois sur deux, et le tir part muet.
+    if (hits.has(id)) return
+
+    if (!playing) { release(); setPlaying(true) }
+
+    const next = new Set(hits)
+    next.add(id)
+    setHits(next)
+    ratioRef.current = total ? next.size / total : 0
+
+    const mote = motesRef.current[index]
+    if (mote) mote.down = true
+
+    recoil()
+    if (!muted) playShot()
+    if (total && next.size >= total && !muted) playPerfect()
+  }, [hits, muted, playing, release, total])
+
+  const reload = () => {
+    // Rien à défaire : les lettres reprennent leur place dès que `is-playing`
+    // tombe, puisque c'est le CSS qui les détachait.
+    motesRef.current = []
+    ratioRef.current = 0
+    setHits(new Set())
+    setPlaying(false)
+    if (!muted) playReload()
+  }
+
+  const toggleMute = () => setMuted((m) => {
+    const next = !m
+    try { localStorage.setItem(MUTE_KEY, next ? '1' : '0') } catch { /* navigation privée */ }
+    return next
+  })
+
+  const done = total > 0 && hits.size >= total
+
+  return (
+    <RangeCtx.Provider value={{ hits, shoot }}>
+      <div
+        ref={hostRef}
+        className={`range${armed ? ' is-armed' : ''}${open ? ' is-open' : ''}`
+          + `${playing ? ' is-playing' : ''}${done ? ' is-done' : ''}`}
+        onPointerMove={(e) => { if (e.pointerType === 'mouse') { setArmed(true); track(e) } }}
+        onPointerLeave={() => setArmed(false)}
+      >
+        {children}
+
+        <div className="crosshair" aria-hidden="true">
+          <span className="ring" /><span className="tick t" /><span className="tick r" />
+          <span className="tick b" /><span className="tick l" /><span className="dot" />
+        </div>
+
+        {/* Le panneau latéral n'existe qu'une fois la partie lancée : avant, le
+            hero n'a pas à porter l'interface d'un jeu que personne n'a ouvert. */}
+        {playing && (
+          <div className="range-side">
+            <p className="range-count tnum">{hits.size}<span>/{total}</span></p>
+            <button type="button" className="range-icon" onClick={reload}
+                    title="Remettre la page comme avant" aria-label="Remettre la page comme avant">
+              <RotateCcw size={20} strokeWidth={1.75} absoluteStrokeWidth aria-hidden="true" />
+            </button>
+            <button type="button" className="range-icon range-mute" onClick={toggleMute}
+                    aria-pressed={muted} title={muted ? 'Rétablir le son' : 'Couper le son'}
+                    aria-label={muted ? 'Rétablir le son' : 'Couper le son'}>
+              {muted ? '🔇' : '🔊'}
+            </button>
+            {done && <p className="range-done">Carton plein</p>}
+          </div>
+        )}
+      </div>
+    </RangeCtx.Provider>
+  )
+}
+
+/* ------------------------------------------------------------ LE TITRE */
+export function ShootableTitle({ lines }) {
+  const range = useContext(RangeCtx)
+  let n = 0
+  const grid = lines.map((line) => [...line].map((ch) => ({ ch, i: ch === ' ' ? -1 : n++ })))
+
+  return (
+    // Le titre reste un titre : son nom accessible porte le texte entier, et
+    // le damier de lettres est masqué aux technologies d'assistance.
+    <h1 aria-label={lines.join(' ')}>
+      {grid.map((chars, li) => (
+        <span key={li} className="h1-line" style={{ '--line-i': li }} aria-hidden="true">
+          <span>
+            {chars.map(({ ch, i }, ci) =>
+              i < 0 ? (
+                <span key={ci} className="h1-space"> </span>
+              ) : (
+                <span
+                  key={ci}
+                  className={`h1-char${range?.hits.has(`c${i}`) ? ' is-hit' : ''}`}
+                  style={spray(i)}
+                  onPointerDown={() => range?.shoot(`c${i}`, i)}
+                >
+                  {ch}
+                </span>
+              ),
+            )}
+          </span>
+        </span>
+      ))}
+    </h1>
+  )
+}

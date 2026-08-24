@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { Button, Countdown } from '../ds'
 import { Icon } from './icons.jsx'
-import { ShootableTitle } from './ShootableTitle.jsx'
+import { ShootableTitle, ShootingRange } from './ShootingRange.jsx'
 import {
   event, stats, navItems, brief, points, jetonSources, bettingRules,
   titles, constraints, proposalFormat, roles,
@@ -112,6 +112,7 @@ function Hero() {
   const current = useContext(CurrentSection)
   return (
     <header className="hero-moment" data-theme="dark" id="hero">
+      <ShootingRange>
       <div className="hero">
       <div className="brandmark">{event.app}</div>
 
@@ -155,6 +156,7 @@ function Hero() {
         })}
       </nav>
       </div>
+      </ShootingRange>
     </header>
   )
 }

@@ -1,26 +1,70 @@
 /* ═════════════════════════════════════════════════════ STAND DE TIR
-   Le titre de l'évènement s'appelle « Olympiade de l'adresse » : il se prête
-   à ce qu'on lui tire dessus. Le viseur suit la souris, un clic dégomme une
-   lettre.
+   L'évènement s'appelle « Olympiade de l'adresse » : son titre se prête à ce
+   qu'on lui tire dessus. Le viseur suit la souris, un clic dégomme une lettre.
+   Au premier tir le reste du hero s'efface, les lettres se détachent et
+   parcourent l'écran — de plus en plus vite à mesure qu'elles tombent.
 
    Rien ici n'est nécessaire pour lire la page. Sans souris, sans JS ou sans
-   mouvement, le titre reste un titre — c'est la seule contrainte qui compte. */
+   mouvement, le titre reste un titre : c'est la seule contrainte qui compte. */
 
 .range { position: relative; }
+
+/* ---------- LE PLATEAU SE VIDE ----------
+   Une fois la partie lancée, tout ce qui n'est pas le titre s'efface : le
+   décompte, les boutons et le sommaire cesseraient d'être lisibles avec des
+   lettres qui leur passent devant, et resteraient cliquables sans être vus. */
+/* Le deuxième enfant du hero est le bloc qui porte le titre : tout le reste
+   s'en va. Viser la position plutôt que les classes évite d'oublier un bloc
+   ajouté plus tard.
+
+   `!important` n'est pas une facilité ici : ces éléments sont entrés en scène
+   avec une animation `forwards`, et le remplissage d'une animation l'emporte
+   sur une déclaration normale. Sans lui, la moitié du hero refuse de partir —
+   exactement ce qu'on observait : le kicker et le tagline s'effaçaient, les
+   stats et le sommaire restaient. */
+.range.is-playing .hero > *:not(:nth-child(2)),
+.range.is-playing .kicker,
+.range.is-playing .tagline {
+  opacity: 0 !important;
+  pointer-events: none;
+  /* `visibility` prend le relais une fois le fondu fini : transparent ne veut
+     pas dire absent — un élément à `opacity: 0` reste lu par les lecteurs
+     d'écran et attrape encore le focus au clavier. */
+  visibility: hidden;
+  transition: opacity var(--dur-slow) var(--ease-out),
+              visibility 0s linear var(--dur-slow);
+}
+/* Le hero garde sa hauteur : les lettres quittent le flux, et sans cela la
+   page remonterait d'un coup sous le curseur. */
+.range.is-playing .hero { min-height: 78vh; }
+.range.is-playing .hero h1 { min-height: 1px; }
 
 /* ---------- LES LETTRES ---------- */
 .h1-char {
   display: inline-block;
   transition: transform var(--dur-fast) var(--ease-out),
               filter var(--dur-fast) var(--ease-out);
-  will-change: transform;
 }
 .h1-space { display: inline-block; white-space: pre; }
 
 /* Une cible doit se signaler quand on la met en joue. */
 .range.is-armed .h1-char:hover {
-  transform: translateY(-2px) scale(1.04);
-  filter: drop-shadow(0 0 12px rgba(245,197,66,.55));
+  filter: drop-shadow(0 0 14px rgba(245,197,66,.6));
+}
+
+/* Détachée : la lettre quitte le flux et se place où la boucle la met. Le
+   détachement tient dans cette seule règle, donc retirer `is-playing` la
+   ramène exactement d'où elle vient — aucun style à défaire.
+   Pas de transition sur `transform` : pilotée image par image, elle traînerait
+   d'une image sur l'autre. */
+.range.is-playing .h1-char {
+  position: fixed;
+  left: 0; top: 0;
+  margin: 0;
+  width: var(--w); height: var(--h);
+  transform: translate3d(var(--x, 0), var(--y, 0), 0);
+  transition: filter var(--dur-fast) var(--ease-out);
+  z-index: 4;
 }
 
 .h1-char.is-hit {
@@ -28,19 +72,20 @@
   animation: knock-out var(--fly-d, 480ms) cubic-bezier(.3, .5, .5, 1) forwards;
 }
 @keyframes knock-out {
-  0%   { transform: none; opacity: 1; }
-  12%  { transform: translate(0, -10px) scale(1.12); filter: brightness(2.2); }
-  100% { transform: translate(var(--fly-x), 340px) rotate(var(--fly-r)) scale(.8); opacity: 0; }
+  0%   { opacity: 1; filter: brightness(2.4); }
+  100% { opacity: 0; filter: none; }
 }
+/* Détachée, la lettre est positionnée par `transform` : le knock-out ne peut
+   plus s'en servir sans la renvoyer à l'origine. Il ne joue que l'extinction. */
 
-/* Les fenêtres qui découpent les lignes à l'entrée coupent aussi les débris.
-   Elles se rouvrent une fois le titre monté. */
+/* Les fenêtres qui découpent les lignes à l'entrée coupent aussi les lettres
+   qui s'échappent. Elles se rouvrent une fois le titre monté. */
 .range.is-open .h1-line { overflow: visible; }
 
 /* ---------- LE VISEUR ---------- */
 /* `pointer: fine` : sur un écran tactile il n'y a pas de curseur à suivre, et
    afficher un viseur au dernier point touché n'aurait aucun sens. Le tir au
-   doigt, lui, continue de marcher. */
+   doigt continue de marcher. */
 @media (pointer: fine) {
   .range.is-armed { cursor: none; }
   .range.is-armed .crosshair { opacity: 1; }
@@ -48,13 +93,13 @@
 
 .crosshair {
   position: absolute;
-  left: var(--aim-x, -100px);
-  top: var(--aim-y, -100px);
+  left: var(--aim-x, -200px);
+  top: var(--aim-y, -200px);
   width: 46px; height: 46px;
   margin: -23px 0 0 -23px;
   opacity: 0;
   pointer-events: none;
-  z-index: 3;
+  z-index: 6;
   transition: opacity var(--dur-fast) var(--ease-out);
 }
 .crosshair .ring {
@@ -66,13 +111,9 @@
 .crosshair .dot {
   position: absolute; left: 50%; top: 50%;
   width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px;
-  background: var(--moment-gold);
-  border-radius: 50%;
+  background: var(--moment-gold); border-radius: 50%;
 }
-.crosshair .tick {
-  position: absolute;
-  background: var(--moment-gold);
-}
+.crosshair .tick { position: absolute; background: var(--moment-gold); }
 .crosshair .tick.t, .crosshair .tick.b { left: 50%; width: 1.5px; height: 9px; margin-left: -.75px; }
 .crosshair .tick.l, .crosshair .tick.r { top: 50%; height: 1.5px; width: 9px; margin-top: -.75px; }
 .crosshair .tick.t { top: -13px; }
@@ -84,58 +125,78 @@
    produit aucune sensation de départ de coup. */
 .range.is-firing .crosshair { animation: recoil 220ms var(--ease-out); }
 @keyframes recoil {
-  0%   { transform: scale(1); }
-  35%  { transform: scale(.72); }
-  100% { transform: scale(1); }
+  0% { transform: scale(1); } 35% { transform: scale(.72); } 100% { transform: scale(1); }
 }
 
-/* ---------- LE SCORE ---------- */
-.range-score {
-  /* Rouvrir les fenêtres de ligne laisse la boîte des lettres déborder sous le
-     titre — line-height et padding compris — et recouvrir cette rangée. Sans
-     ce plan, un clic sur « Remettre les lettres » atteint la lettre qui passe
-     par-dessus et en dégomme une de plus. */
-  position: relative;
-  z-index: 2;
+/* ---------- LE PANNEAU LATÉRAL ---------- */
+.range-side {
+  position: fixed;
+  right: var(--sp-5);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.range-count {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--moment-gold);
+  line-height: 1;
+}
+.range-count span { font-size: var(--text-xs); color: var(--text-muted); }
+.range-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: var(--sp-2) var(--sp-3);
-  margin: var(--sp-4) 0 0;
-  font-size: var(--text-xs);
-}
-.range-score .tnum {
-  font-family: var(--font-display);
-  font-size: var(--text-md);
-  color: var(--moment-gold);
-}
-.range-label {
+  width: 42px; height: 42px;
+  font-size: 15px;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
-}
-.range-reset {
-  font-family: var(--font-body);
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-  background: transparent;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  backdrop-filter: var(--backdrop-blur);
   border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
-  padding: var(--sp-1) var(--sp-3);
+  border-radius: 50%;
   cursor: pointer;
   transition: color var(--dur-fast) var(--ease-out),
-              border-color var(--dur-fast) var(--ease-out);
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
 }
-.range-reset:hover { color: var(--text); border-color: var(--line-strong); }
+.range-icon:hover {
+  color: var(--moment-gold);
+  border-color: color-mix(in srgb, var(--moment-gold) 45%, transparent);
+  transform: rotate(-40deg);
+}
+.range-mute:hover { transform: none; }
+.range-done {
+  margin: 0;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--moment-gold);
+  writing-mode: vertical-rl;
+}
 
-/* Le jeu se déclenche au clic : il ne s'impose à personne. Ce qui doit
-   disparaître sous mouvement réduit, c'est ce qui bouge sans qu'on l'ait
-   demandé — et la lettre doit tout de même quitter l'écran. */
+@media (max-width: 760px) {
+  .range-side { right: var(--sp-3); gap: var(--sp-2); }
+  .range-icon { width: 38px; height: 38px; }
+}
+
+/* Le jeu se déclenche au clic : il ne s'impose à personne. Sous mouvement
+   réduit les lettres ne dérivent pas — la boucle n'est même pas lancée — mais
+   elles doivent tout de même quitter l'écran quand on les touche. */
 @media (prefers-reduced-motion: reduce) {
   .h1-char { transition: none; }
-  .range.is-armed .h1-char:hover { transform: none; }
+  .range.is-armed .h1-char:hover { filter: none; }
   .h1-char.is-hit { animation: none; opacity: 0; visibility: hidden; }
   .range.is-firing .crosshair { animation: none; }
-  .crosshair { transition: none; }
+  .crosshair, .range-icon { transition: none; }
+  .range-icon:hover { transform: none; }
+  .range.is-playing .hero > *:not(:nth-child(2)),
+  .range.is-playing .kicker,
+  .range.is-playing .tagline { transition: none; }
 }
