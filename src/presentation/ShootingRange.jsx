@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Crosshair, RotateCcw } from 'lucide-react'
 import { Button, Countdown } from '../ds'
 import { event } from './content.jsx'
@@ -33,6 +33,12 @@ const BURST_TAU = 0.34    // s — constante d'amortissement
 // soit jouée d'avance, et pas de quoi arroser jusqu'à ce que ça tombe.
 const MARGE = 6
 
+// Viser une lettre qui file avec un doigt, sans viseur qui suit, est plus dur
+// qu'avec une souris. Le chargeur tactile est plus généreux d'autant.
+const MARGE_TACTILE = 5
+const estTactile = () => typeof window !== 'undefined'
+  && window.matchMedia('(pointer: coarse)').matches
+
 export function ShootingRange({ children }) {
   const [hits, setHits] = useState(() => new Set())
   const [playing, setPlaying] = useState(false)
@@ -41,6 +47,7 @@ export function ShootingRange({ children }) {
   const [muted, setMuted] = useState(readMuted)
   const [total, setTotal] = useState(0)
   const [ammo, setAmmo] = useState(0)
+  const [chargeur, setChargeur] = useState(0)   // capacité, tactile comprise
   const [outcome, setOutcome] = useState(null)   // null | 'win' | 'lose'
 
   const hostRef = useRef(null)
@@ -53,8 +60,10 @@ export function ShootingRange({ children }) {
     const host = hostRef.current
     if (!host) return
     const n = host.querySelectorAll('.h1-char').length
+    const capacite = n + MARGE + (estTactile() ? MARGE_TACTILE : 0)
     setTotal(n)
-    setAmmo(n + MARGE)
+    setChargeur(capacite)
+    setAmmo(capacite)
   }, [])
 
   // Les lignes du titre montent derrière une fenêtre qui les découpe. Tant
@@ -90,13 +99,36 @@ export function ShootingRange({ children }) {
     })
   }, [])
 
-  const recoil = () => {
+  const tapRef = useRef(0)
+  const [coups, setCoups] = useState(0)      // compte les tirs, pas les touches
+  const dernierDoigt = useRef(null)          // où le doigt a touché, ou null
+
+  // Le recul et le viseur au doigt s'écrivent en classes posées à la main. Or
+  // React réécrit `className` dès que la chaîne rendue change — au premier
+  // tir, `is-playing` apparaît et emporte tout ce qu'on avait ajouté. Les
+  // poser dans un effet de mise en page, après que React a écrit, est le seul
+  // ordre qui tienne. Sans ça, le tout premier coup partait sans recul et sans
+  // viseur, et seuls les suivants en avaient.
+  useLayoutEffect(() => {
+    if (!coups) return
     const host = hostRef.current
     if (!host) return
+
     host.classList.remove('is-firing')
-    void host.offsetWidth
+    void host.offsetWidth                     // force la reprise de l'animation
     host.classList.add('is-firing')
-  }
+
+    const doigt = dernierDoigt.current
+    if (!doigt) return
+    // Au doigt il n'y a pas de survol, donc pas de viseur : le coup partirait
+    // sans qu'on voie d'où. On le montre à l'endroit touché, puis il s'efface.
+    const r = host.getBoundingClientRect()
+    host.style.setProperty('--aim-x', `${doigt.x - r.left}px`)
+    host.style.setProperty('--aim-y', `${doigt.y - r.top}px`)
+    host.classList.add('is-tapped')
+    clearTimeout(tapRef.current)
+    tapRef.current = setTimeout(() => host.classList.remove('is-tapped'), 700)
+  }, [coups])
 
   /* ------------------------------------------------- LES LETTRES LÂCHÉES */
   // Au premier tir, chaque lettre est détachée à l'endroit exact où elle se
@@ -204,6 +236,7 @@ export function ShootingRange({ children }) {
   useEffect(() => () => {
     cancelAnimationFrame(aimRaf.current)
     cancelAnimationFrame(driftRaf.current)
+    clearTimeout(tapRef.current)
   }, [])
 
   /* ----------------------------------------------------------- LE TIR */
@@ -221,7 +254,10 @@ export function ShootingRange({ children }) {
       : null
 
     if (!playing) { release(); setPlaying(true) }
-    recoil()
+    dernierDoigt.current = e.pointerType === 'mouse'
+      ? null
+      : { x: e.clientX, y: e.clientY }
+    setCoups((n) => n + 1)
 
     const left = ammo - 1
     setAmmo(left)
@@ -261,9 +297,9 @@ export function ShootingRange({ children }) {
     setHits(new Set())
     setPlaying(false)
     setOutcome(null)
-    setAmmo(total + MARGE)
+    setAmmo(chargeur)
     if (!muted && !silencieux) playReload()
-  }, [muted, total])
+  }, [chargeur, muted])
 
   // « Lire la suite » : on rend la page telle qu'elle était et on amène le
   // lecteur là où il allait avant qu'on lui propose de jouer.
@@ -411,7 +447,7 @@ export function ShootableTitle({ lines }) {
                   key={ci}
                   data-id={`c${i}`}
                   className={`h1-char${range?.hits.has(`c${i}`) ? ' is-hit' : ''}`}
-                  style={spray(i)}
+                  style={{ ...spray(i), '--pulse': i }}
                 >
                   {ch}
                 </span>
@@ -423,8 +459,8 @@ export function ShootableTitle({ lines }) {
     </h1>
     {indice && (
       <span className="range-hint" aria-hidden="true">
-        <Crosshair size={13} strokeWidth={1.75} absoluteStrokeWidth />
-        Vise les lettres
+        <Crosshair size={15} strokeWidth={2} absoluteStrokeWidth />
+        Tire sur les lettres
       </span>
     )}
     </div>

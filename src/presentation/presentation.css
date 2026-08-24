@@ -342,7 +342,7 @@ footer.page-footer {
   .cd-cell { padding: 10px 8px !important; }
   .cd-cell > div:first-child { font-size: 26px !important; }
   .range-hint { font-size: 11px; }
-  .title-wrap { padding-bottom: 24px; }
+  .title-wrap { padding-bottom: 48px; }
 }
 
 @media (max-width: 380px) {
