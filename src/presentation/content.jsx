@@ -21,13 +21,13 @@ export const stats = [
 ]
 
 export const navItems = [
-  { href: "#regle", label: "La règle d'or" },
-  { href: "#samedi", label: "Samedi" },
-  { href: "#paris", label: "Jetons & paris" },
-  { href: "#dimanche", label: "Dimanche" },
-  { href: "#prix", label: "Meilleur jeu" },
-  { href: "#titres", label: "Les titres" },
-  { href: "#proposer", label: "Proposer un jeu" },
+  { href: "#regle", icon: "book", label: "La règle d'or" },
+  { href: "#samedi", icon: "target", label: "Samedi" },
+  { href: "#paris", icon: "dice", label: "Jetons & paris" },
+  { href: "#dimanche", icon: "team", label: "Dimanche" },
+  { href: "#prix", icon: "medal", label: "Meilleur jeu" },
+  { href: "#titres", icon: "trophy", label: "Les titres" },
+  { href: "#proposer", icon: "gear", label: "Proposer un jeu" },
 ]
 
 export const brief = [

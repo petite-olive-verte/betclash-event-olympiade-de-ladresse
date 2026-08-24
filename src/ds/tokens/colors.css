@@ -37,6 +37,18 @@
   --rank-1:#f5c542;
   --rank-2:#c8ccd8;
   --rank-3:#d98a4e;
+
+  /* ---- encres d'icône — AJOUT LOCAL, absent de Claude Design ----
+     Une encre par rôle, pas par jolie couleur : deux icônes ne partagent une
+     encre que si elles portent le même rôle. Sur fond sombre les teintes
+     sémantiques passent telles quelles, d'où les simples alias. */
+  --ink-brand:var(--gold);        /* la règle fondatrice, l'identité */
+  --ink-terrain:var(--success);   /* le terrain : un score qui se confirme */
+  --ink-jeton:var(--jeton);       /* le marché : la monnaie et les paris */
+  --ink-rank-1:var(--rank-1);     /* première marche du podium */
+  --ink-rank-3:var(--rank-3);     /* les autres distinctions */
+  --ink-info:var(--info);         /* information neutre : dates, durées */
+  --ink-meta:var(--text-muted);   /* méta : matériel, réglages */
 }
 
 /* ---- white mode — pour les pages publiques (annonce, accueil) ---- */
@@ -54,4 +66,19 @@
   --jeton-wash:rgba(43,182,163,.1);
   --error-wash:rgba(239,67,96,.09);
   --info-wash:rgba(90,169,255,.1);
+
+  /* Encres assombries à teinte et saturation constantes : les valeurs du
+     thème sombre plafonnent à 1,6:1 sur blanc, ces variantes tiennent 3,2:1
+     sur --surface, le fond le plus clair sur lequel une icône se pose. */
+  --ink-brand:#ae8209;
+  --ink-terrain:#249989;
+  --ink-jeton:#249c5d;
+  --ink-rank-1:#ae8209;
+  --ink-rank-3:#cd722c;
+  --ink-info:#1a88ff;
+  /* `data-theme` vit sur un div, pas sur :root. Un alias déclaré dans :root y
+     est résolu une fois pour toutes avec les valeurs du thème sombre, puis
+     hérité tel quel : il faut le redéclarer ici pour qu'il relise
+     --text-muted dans le bon thème. */
+  --ink-meta:var(--text-muted);
 }

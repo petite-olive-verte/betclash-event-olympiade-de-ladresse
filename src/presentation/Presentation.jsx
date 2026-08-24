@@ -1,24 +1,54 @@
+import { createContext, useContext, useEffect, useState } from 'react'
 import { Button, Countdown } from '../ds'
-import {
-  IconTarget, IconTeam, IconDice, IconMedal, IconTrophy, IconGear, IconBook, IconClock,
-} from './icons.jsx'
+import { Icon } from './icons.jsx'
 import {
   event, stats, navItems, brief, points, jetonSources, bettingRules,
   titles, constraints, proposalFormat, roles,
 } from './content.jsx'
 import './presentation.css'
 
-const ICONS = {
-  target: IconTarget, team: IconTeam, dice: IconDice, medal: IconMedal,
-  trophy: IconTrophy, gear: IconGear, book: IconBook, clock: IconClock,
+// Quelle section est sous les yeux du lecteur. La nav et l'icône de section
+// s'allument à partir de cette seule valeur, ce qui évite de désynchroniser
+// les deux états.
+const CurrentSection = createContext(null)
+
+function useSectionSpy(ids) {
+  const [current, setCurrent] = useState(null)
+
+  useEffect(() => {
+    const seen = new Map()
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) seen.set(e.target.id, e)
+        // La section active est la plus haute de celles qui coupent la bande
+        // de lecture : en défilement lent, deux sections s'y croisent.
+        const visible = [...seen.values()]
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+        if (visible.length) setCurrent(visible[0].target.id)
+      },
+      // Une bande étroite au tiers supérieur : la section « courante » est
+      // celle qu'on lit, pas celle qui occupe le plus de pixels.
+      { rootMargin: '-25% 0px -65% 0px', threshold: 0 },
+    )
+
+    for (const id of ids) {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    }
+    return () => observer.disconnect()
+  }, [ids])
+
+  return current
 }
 
-function Section({ id, num, title, sub, badge, children }) {
+function Section({ id, icon, title, sub, badge, children }) {
+  const active = useContext(CurrentSection) === id
   return (
     <section id={id} className="section" aria-labelledby={`${id}-title`}>
       <div className="wrap">
-        <div className="section-rule">
-          <span className="num">{num}</span>
+        <div className={`section-rule${active ? ' is-active' : ''}`} data-icon={icon}>
+          <span className="section-icon"><Icon name={icon} size={22} /></span>
           <div className="bar" />
         </div>
         {badge && <div className="day-badge">{badge}</div>}
@@ -41,6 +71,7 @@ function Row({ k, v, color, className = 'row' }) {
 
 /* ---------------------------------------------------------------- HERO */
 function Hero() {
+  const current = useContext(CurrentSection)
   return (
     <header className="hero">
       <div className="brandmark">{event.app}</div>
@@ -72,9 +103,21 @@ function Hero() {
       </div>
 
       <nav className="pills" aria-label="Sections du règlement">
-        {navItems.map((n) => (
-          <a key={n.href} className="pill" href={n.href}>{n.label}</a>
-        ))}
+        {navItems.map((n) => {
+          const active = current === n.href.slice(1)
+          return (
+            <a
+              key={n.href}
+              className={`pill${active ? ' is-active' : ''}`}
+              href={n.href}
+              data-icon={n.icon}
+              aria-current={active ? 'true' : undefined}
+            >
+              <Icon name={n.icon} size={15} />
+              {n.label}
+            </a>
+          )
+        })}
       </nav>
     </header>
   )
@@ -83,7 +126,7 @@ function Hero() {
 /* ------------------------------------------------------------ SECTIONS */
 function Brief() {
   return (
-    <Section id="bref" num="00" title="Le week-end en bref" sub="Ce qu'il faut savoir avant de lire le reste.">
+    <Section id="bref" icon="clock" title="Le week-end en bref" sub="Ce qu'il faut savoir avant de lire le reste.">
       <div className="autogrid c260">
         {brief.map((b) => (
           <div key={b.day} className="card pad" style={{ padding: 28 }}>
@@ -98,7 +141,7 @@ function Brief() {
 
 function GoldenRule() {
   return (
-    <Section id="regle" num="01" title="La règle d'or" sub="Si vous ne lisez qu'un paragraphe, c'est celui-là.">
+    <Section id="regle" icon="book" title="La règle d'or" sub="Si vous ne lisez qu'un paragraphe, c'est celui-là.">
       <div className="panel-gold">
         <p style={{
           fontFamily: 'var(--font-display)', textTransform: 'uppercase',
@@ -129,7 +172,7 @@ function GoldenRule() {
 function Saturday() {
   return (
     <Section
-      id="samedi" num="02" title="Samedi — les duels"
+      id="samedi" icon="target" title="Samedi — les duels"
       badge="Jour 1 · samedi 10 octobre"
       sub="Un contre un, cinq tours, tout le monde joue jusqu'au bout."
     >
@@ -169,7 +212,7 @@ function Saturday() {
 
 function Betting() {
   return (
-    <Section id="paris" num="03" title="Les jetons et les paris" sub="Une seule cagnotte, une seule formule, quatre règles.">
+    <Section id="paris" icon="dice" title="Les jetons et les paris" sub="Une seule cagnotte, une seule formule, quatre règles.">
       <div className="autogrid c280" style={{ marginBottom: 'var(--sp-7)' }}>
         <div className="card list">
           <div className="card-label">D'où viennent les jetons</div>
@@ -234,7 +277,7 @@ function Betting() {
 function Sunday() {
   return (
     <Section
-      id="dimanche" num="04" title="Dimanche — les équipes"
+      id="dimanche" icon="team" title="Dimanche — les équipes"
       badge="Jour 2 · dimanche 11 octobre"
       sub="Chacune contre toutes, et celle qui se repose tient le marché."
     >
@@ -268,7 +311,7 @@ function Sunday() {
 
 function BestGame() {
   return (
-    <Section id="prix" num="05" title="Le prix du meilleur jeu" sub="Concevoir un bon jeu est une façon de gagner à part entière.">
+    <Section id="prix" icon="medal" title="Le prix du meilleur jeu" sub="Concevoir un bon jeu est une façon de gagner à part entière.">
       <p className="prose" style={{ maxWidth: 820, marginBottom: 'var(--sp-7)' }}>
         Deux votes : <strong>meilleur jeu de duel</strong> samedi soir au moment du draft,{' '}
         <strong>meilleur jeu d'équipe</strong> dimanche à la remise des prix. Chacun classe ses{' '}
@@ -308,14 +351,13 @@ function BestGame() {
 
 function Titles() {
   return (
-    <Section id="titres" num="06" title="Les cinq titres" sub="Cinq façons de gagner. Il y en a forcément une pour toi.">
+    <Section id="titres" icon="trophy" title="Les cinq titres" sub="Cinq façons de gagner. Il y en a forcément une pour toi.">
       <div className="autogrid c220" style={{ marginBottom: 'var(--sp-7)' }}>
-        {titles.map((t) => {
-          const Icon = ICONS[t.icon]
-          return (
+        {titles.map((t) => (
             <div
               key={t.name}
-              className={t.highlight ? '' : 'card'}
+              className={`title-card${t.highlight ? '' : ' card'}`}
+              data-icon={t.icon}
               style={{
                 borderRadius: 'var(--radius-md)',
                 padding: 'var(--sp-6)',
@@ -324,14 +366,13 @@ function Titles() {
                   : {}),
               }}
             >
-              <div style={{ marginBottom: 14 }}><Icon /></div>
+              <div className="title-card-icon"><Icon name={t.icon} size={40} /></div>
               <div style={{ fontFamily: 'var(--font-display)', textTransform: 'uppercase', fontSize: 16, marginBottom: 4 }}>
                 {t.name}
               </div>
               <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t.meta}</div>
             </div>
-          )
-        })}
+        ))}
       </div>
       <p className="prose muted last" style={{ fontSize: 15, maxWidth: 720 }}>
         Nul aux jeux d'adresse mais bon lecteur de gens ? Il y a un titre pour toi. Mauvais parieur mais bon
@@ -343,7 +384,7 @@ function Titles() {
 
 function Propose() {
   return (
-    <Section id="proposer" num="07" title="Proposer un jeu" sub="Un jeu par personne. Connu ou inventé, peu importe.">
+    <Section id="proposer" icon="gear" title="Proposer un jeu" sub="Un jeu par personne. Connu ou inventé, peu importe.">
       <div className="split" style={{ gridTemplateColumns: '1.2fr 1fr', marginBottom: 'var(--sp-7)' }}>
         <div>
           <div className="eyebrow" style={{ marginBottom: 'var(--sp-4)' }}>Les contraintes — lisez-les vraiment</div>
@@ -353,17 +394,11 @@ function Propose() {
         </div>
         <div className="card list">
           <div className="card-label">Le format</div>
-          {proposalFormat.map((f) => {
-            const Icon = ICONS[f.icon]
-            return (
-              <div key={f.label} style={{
-                display: 'flex', gap: 12, alignItems: 'center',
-                padding: '10px 20px', borderTop: '1px solid var(--line)', fontSize: 'var(--text-sm)',
-              }}>
-                <Icon size={20} /> {f.label}
-              </div>
-            )
-          })}
+          {proposalFormat.map((f) => (
+            <div key={f.label} className="format-row" data-icon={f.icon}>
+              <Icon name={f.icon} size={20} /> {f.label}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -378,7 +413,7 @@ function Propose() {
 
 function Roles() {
   return (
-    <Section id="qui" num="08" title="Qui fait quoi" sub="Trois rôles, et une seule voix qui tranche.">
+    <Section id="qui" icon="team" title="Qui fait quoi" sub="Trois rôles, et une seule voix qui tranche.">
       <div className="autogrid c240">
         {roles.map((r) => (
           <div key={r.name} className="card pad">
@@ -392,8 +427,14 @@ function Roles() {
 }
 
 /* ------------------------------------------------------------------ PAGE */
+// Figé hors du composant : passer un tableau neuf à chaque rendu relancerait
+// l'observateur en boucle.
+const SECTION_IDS = navItems.map((n) => n.href.slice(1))
+
 export default function Presentation() {
+  const current = useSectionSpy(SECTION_IDS)
   return (
+    <CurrentSection value={current}>
     <div data-theme="light" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh', overflowX: 'hidden' }}>
       <Hero />
       <Brief />
@@ -415,5 +456,6 @@ export default function Presentation() {
         </p>
       </footer>
     </div>
+    </CurrentSection>
   )
 }
