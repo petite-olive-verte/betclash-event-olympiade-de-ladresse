@@ -82,6 +82,45 @@
    qui s'échappent. Elles se rouvrent une fois le titre monté. */
 .range.is-open .h1-line { overflow: visible; }
 
+/* ---------- L'INDICE TACTILE ----------
+   Posé en absolu sous le titre : il ne décale rien, donc l'ajouter ou le
+   retirer ne fait pas bouger la page d'un pixel. */
+.title-wrap { position: relative; }
+.range-hint {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  transform: translateX(-50%);
+  align-items: center;
+  gap: var(--sp-2);
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.range-hint > svg { color: var(--moment-gold); }
+
+/* `pointer: coarse` : là où il y a un curseur, le viseur au survol dit déjà
+   tout. L'indice ne s'affiche que là où ce signal n'existe pas. */
+@media (pointer: coarse) {
+  /* L'indice a besoin de sa ligne. En absolu sans réserver de place, il se
+     posait par-dessus le tagline — les deux textes se mélangeaient et aucun
+     des deux ne se lisait. La réserve reste après la disparition de l'indice,
+     de sorte que rien ne saute au premier tir. */
+  .title-wrap { padding-bottom: 30px; }
+  .range-hint {
+    display: inline-flex;
+    animation: hint-in var(--dur-slow) var(--ease-out) 1800ms backwards,
+               hint-breathe 2.8s ease-in-out 2400ms infinite;
+  }
+}
+@keyframes hint-in { from { opacity: 0; transform: translate(-50%, 8px) } to { opacity: 1; transform: translateX(-50%) } }
+@keyframes hint-breathe { 0%, 100% { opacity: .55 } 50% { opacity: 1 } }
+
 /* ---------- LE VISEUR ---------- */
 /* `pointer: fine` : sur un écran tactile il n'y a pas de curseur à suivre, et
    afficher un viseur au dernier point touché n'aurait aucun sens. Le tir au
@@ -205,6 +244,7 @@
    réduit les lettres ne dérivent pas — la boucle n'est même pas lancée — mais
    elles doivent tout de même quitter l'écran quand on les touche. */
 @media (prefers-reduced-motion: reduce) {
+  @media (pointer: coarse) { .range-hint { animation: none; opacity: 1; } }
   .h1-char { transition: none; }
   .range.is-armed .h1-char:hover { filter: none; }
   .h1-char.is-hit { animation: none; opacity: 0; visibility: hidden; }

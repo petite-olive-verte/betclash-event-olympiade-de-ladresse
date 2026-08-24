@@ -254,7 +254,7 @@ export function ShootingRange({ children }) {
   const restantes = total - hits.size
 
   return (
-    <RangeCtx.Provider value={{ hits, fire }}>
+    <RangeCtx.Provider value={{ hits, fire, playing, outcome }}>
       <div
         ref={hostRef}
         className={`range${armed ? ' is-armed' : ''}${open ? ' is-open' : ''}`
@@ -353,9 +353,16 @@ export function ShootableTitle({ lines }) {
   let n = 0
   const grid = lines.map((line) => [...line].map((ch) => ({ ch, i: ch === ' ' ? -1 : n++ })))
 
+  // Au survol, le viseur dit tout seul qu'on peut tirer. Un écran tactile n'a
+  // pas de survol : sans un mot, le jeu reste invisible pour qui n'essaie pas
+  // de toucher le titre par hasard. L'indice ne s'affiche donc que là où il
+  // manque quelque chose, et disparaît au premier coup.
+  const indice = !range?.playing && !range?.outcome
+
   return (
-    // Le titre reste un titre : son nom accessible porte le texte entier, et
-    // le damier de lettres est masqué aux technologies d'assistance.
+    <div className="title-wrap">
+    {/* Le titre reste un titre : son nom accessible porte le texte entier, et
+        le damier de lettres est masqué aux technologies d'assistance. */}
     <h1 aria-label={lines.join(' ')}>
       {grid.map((chars, li) => (
         <span key={li} className="h1-line" style={{ '--line-i': li }} aria-hidden="true">
@@ -381,5 +388,12 @@ export function ShootableTitle({ lines }) {
         </span>
       ))}
     </h1>
+    {indice && (
+      <span className="range-hint" aria-hidden="true">
+        <Crosshair size={13} strokeWidth={1.75} absoluteStrokeWidth />
+        Vise les lettres
+      </span>
+    )}
+    </div>
   )
 }
