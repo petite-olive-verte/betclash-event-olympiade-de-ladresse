@@ -1,4 +1,4 @@
-# Les jeux de l'adresse
+# Olympiade de l'adresse
 
 Le règlement du week-end : duels le samedi, équipes le dimanche, paris en continu et cinq titres à prendre.
 
