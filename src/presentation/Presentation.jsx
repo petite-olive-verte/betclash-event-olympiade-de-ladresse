@@ -1,25 +1,54 @@
+import { createContext, useContext, useEffect, useState } from 'react'
 import { Button, Countdown } from '../ds'
-import {
-  IconTarget, IconTeam, IconDice, IconMedal, IconTrophy, IconGear, IconBook, IconClock,
-} from './icons.jsx'
+import { Icon } from './icons.jsx'
 import {
   event, stats, navItems, brief, points, jetonSources, bettingRules,
   titles, constraints, proposalFormat, roles,
 } from './content.jsx'
 import './presentation.css'
 
-const ICONS = {
-  target: IconTarget, team: IconTeam, dice: IconDice, medal: IconMedal,
-  trophy: IconTrophy, gear: IconGear, book: IconBook, clock: IconClock,
+// Quelle section est sous les yeux du lecteur. La nav et l'icône de section
+// s'allument à partir de cette seule valeur, ce qui évite de désynchroniser
+// les deux états.
+const CurrentSection = createContext(null)
+
+function useSectionSpy(ids) {
+  const [current, setCurrent] = useState(null)
+
+  useEffect(() => {
+    const seen = new Map()
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) seen.set(e.target.id, e)
+        // La section active est la plus haute de celles qui coupent la bande
+        // de lecture : en défilement lent, deux sections s'y croisent.
+        const visible = [...seen.values()]
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+        if (visible.length) setCurrent(visible[0].target.id)
+      },
+      // Une bande étroite au tiers supérieur : la section « courante » est
+      // celle qu'on lit, pas celle qui occupe le plus de pixels.
+      { rootMargin: '-25% 0px -65% 0px', threshold: 0 },
+    )
+
+    for (const id of ids) {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    }
+    return () => observer.disconnect()
+  }, [ids])
+
+  return current
 }
 
 function Section({ id, icon, title, sub, badge, children }) {
-  const Icon = ICONS[icon]
+  const active = useContext(CurrentSection) === id
   return (
     <section id={id} className="section" aria-labelledby={`${id}-title`}>
       <div className="wrap">
-        <div className="section-rule">
-          <span className="section-icon"><Icon size={22} /></span>
+        <div className={`section-rule${active ? ' is-active' : ''}`}>
+          <span className="section-icon"><Icon name={icon} size={22} /></span>
           <div className="bar" />
         </div>
         {badge && <div className="day-badge">{badge}</div>}
@@ -42,6 +71,7 @@ function Row({ k, v, color, className = 'row' }) {
 
 /* ---------------------------------------------------------------- HERO */
 function Hero() {
+  const current = useContext(CurrentSection)
   return (
     <header className="hero">
       <div className="brandmark">{event.app}</div>
@@ -73,9 +103,20 @@ function Hero() {
       </div>
 
       <nav className="pills" aria-label="Sections du règlement">
-        {navItems.map((n) => (
-          <a key={n.href} className="pill" href={n.href}>{n.label}</a>
-        ))}
+        {navItems.map((n) => {
+          const active = current === n.href.slice(1)
+          return (
+            <a
+              key={n.href}
+              className={`pill${active ? ' is-active' : ''}`}
+              href={n.href}
+              aria-current={active ? 'true' : undefined}
+            >
+              <Icon name={n.icon} size={15} />
+              {n.label}
+            </a>
+          )
+        })}
       </nav>
     </header>
   )
@@ -311,12 +352,10 @@ function Titles() {
   return (
     <Section id="titres" icon="trophy" title="Les cinq titres" sub="Cinq façons de gagner. Il y en a forcément une pour toi.">
       <div className="autogrid c220" style={{ marginBottom: 'var(--sp-7)' }}>
-        {titles.map((t) => {
-          const Icon = ICONS[t.icon]
-          return (
+        {titles.map((t) => (
             <div
               key={t.name}
-              className={t.highlight ? '' : 'card'}
+              className={`title-card${t.highlight ? '' : ' card'}`}
               style={{
                 borderRadius: 'var(--radius-md)',
                 padding: 'var(--sp-6)',
@@ -325,14 +364,13 @@ function Titles() {
                   : {}),
               }}
             >
-              <div style={{ marginBottom: 14 }}><Icon /></div>
+              <div className="title-card-icon"><Icon name={t.icon} size={40} /></div>
               <div style={{ fontFamily: 'var(--font-display)', textTransform: 'uppercase', fontSize: 16, marginBottom: 4 }}>
                 {t.name}
               </div>
               <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t.meta}</div>
             </div>
-          )
-        })}
+        ))}
       </div>
       <p className="prose muted last" style={{ fontSize: 15, maxWidth: 720 }}>
         Nul aux jeux d'adresse mais bon lecteur de gens ? Il y a un titre pour toi. Mauvais parieur mais bon
@@ -354,17 +392,11 @@ function Propose() {
         </div>
         <div className="card list">
           <div className="card-label">Le format</div>
-          {proposalFormat.map((f) => {
-            const Icon = ICONS[f.icon]
-            return (
-              <div key={f.label} style={{
-                display: 'flex', gap: 12, alignItems: 'center',
-                padding: '10px 20px', borderTop: '1px solid var(--line)', fontSize: 'var(--text-sm)',
-              }}>
-                <Icon size={20} /> {f.label}
-              </div>
-            )
-          })}
+          {proposalFormat.map((f) => (
+            <div key={f.label} className="format-row">
+              <Icon name={f.icon} size={20} /> {f.label}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -393,8 +425,14 @@ function Roles() {
 }
 
 /* ------------------------------------------------------------------ PAGE */
+// Figé hors du composant : passer un tableau neuf à chaque rendu relancerait
+// l'observateur en boucle.
+const SECTION_IDS = navItems.map((n) => n.href.slice(1))
+
 export default function Presentation() {
+  const current = useSectionSpy(SECTION_IDS)
   return (
+    <CurrentSection value={current}>
     <div data-theme="light" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh', overflowX: 'hidden' }}>
       <Hero />
       <Brief />
@@ -416,5 +454,6 @@ export default function Presentation() {
         </p>
       </footer>
     </div>
+    </CurrentSection>
   )
 }

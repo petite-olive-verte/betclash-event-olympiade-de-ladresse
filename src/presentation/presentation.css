@@ -22,8 +22,23 @@
 .section-rule .section-icon {
   display: flex;
   flex: none;
+  color: var(--text-faint);
+  transition: color var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-out);
 }
-.section-rule .bar { flex: 1; height: 1px; background: var(--line); }
+/* La section qu'on est en train de lire s'allume : c'est le seul repère de
+   position une fois le sommaire du hero hors de l'écran. */
+.section-rule.is-active .section-icon {
+  color: var(--gold);
+  transform: scale(1.12);
+}
+.section-rule.is-active .bar { background: var(--gold-line); }
+.section-rule .bar {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+  transition: background var(--dur-base) var(--ease-out);
+}
 
 .section h2 {
   font-family: var(--font-display);
@@ -182,6 +197,9 @@
 
 .pills { display: flex; gap: var(--sp-2); flex-wrap: wrap; justify-content: center; margin-top: var(--sp-5); }
 .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
   padding: var(--sp-2) var(--sp-4);
   border-radius: var(--radius-pill);
   border: 1px solid var(--line);
@@ -190,10 +208,17 @@
   text-decoration: none;
   transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast), color var(--dur-fast);
 }
+/* Les icônes Lucide dessinent en currentColor : la pastille entière change de
+   couleur d'un seul coup, texte et pictogramme ensemble. */
 .pill:hover, .pill:focus-visible {
   background: var(--surface-2);
   border-color: var(--line-strong);
   color: var(--text);
+}
+.pill.is-active {
+  background: var(--gold-wash);
+  border-color: var(--gold-line);
+  color: var(--gold);
 }
 .pill:focus-visible, .card a:focus-visible, button:focus-visible, a:focus-visible {
   outline: none;
@@ -234,4 +259,48 @@ footer.page-footer {
 }
 @media (max-width: 380px) {
   .cd-cell { padding: 12px 6px !important; }
+}
+
+/* ----------------------------------------------------------- LES TITRES */
+.title-card {
+  border-radius: var(--radius-md);
+  padding: var(--sp-6);
+  transition: border-color var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-out);
+}
+.title-card-icon {
+  margin-bottom: 14px;
+  color: var(--gold);
+  transition: color var(--dur-base) var(--ease-out),
+              transform var(--dur-base) var(--ease-out);
+}
+.title-card:hover { border-color: var(--gold-line); transform: translateY(-2px); }
+.title-card:hover .title-card-icon { color: var(--gold-strong); transform: scale(1.08); }
+
+/* ------------------------------------------------- LE FORMAT DE PROPOSITION */
+.format-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 20px;
+  border-top: 1px solid var(--line);
+  font-size: var(--text-sm);
+}
+.format-row > svg { color: var(--gold); flex: none; }
+
+/* Aucun de ces états n'est porteur d'information à lui seul : les couper ne
+   retire rien au contenu. */
+@media (prefers-reduced-motion: reduce) {
+  .section-rule .section-icon,
+  .section-rule .bar,
+  .title-card,
+  .title-card-icon,
+  .pill {
+    transition: none;
+  }
+  .section-rule.is-active .section-icon,
+  .title-card:hover,
+  .title-card:hover .title-card-icon {
+    transform: none;
+  }
 }
