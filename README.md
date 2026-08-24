@@ -28,8 +28,15 @@ src/
     content.jsx        tout le texte et les réglages de l'évènement
     Presentation.jsx   la page
     icons.jsx          Lucide, encré par rôle
+    ShootableTitle.jsx le titre, et le stand de tir qui va avec
     presentation.css   composition + responsive
+    shooting.css       viseur, lettres dégommées, score
 ```
+
+Le titre s'appelle « Olympiade de l'adresse », alors on peut lui tirer dessus :
+un viseur suit la souris, un clic dégomme une lettre. Le jeu ne se déclenche
+qu'au clic, le titre garde son nom accessible, et sans souris, sans JS ou sous
+`prefers-reduced-motion`, il reste un titre.
 
 Les fichiers de `ds/tokens/` sont copiés à l'identique de Claude Design, à une
 exception près : le bloc `encres d'icône` de `colors.css`, ajouté ici et marqué

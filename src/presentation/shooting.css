@@ -1,0 +1,141 @@
+/* ═════════════════════════════════════════════════════ STAND DE TIR
+   Le titre de l'évènement s'appelle « Olympiade de l'adresse » : il se prête
+   à ce qu'on lui tire dessus. Le viseur suit la souris, un clic dégomme une
+   lettre.
+
+   Rien ici n'est nécessaire pour lire la page. Sans souris, sans JS ou sans
+   mouvement, le titre reste un titre — c'est la seule contrainte qui compte. */
+
+.range { position: relative; }
+
+/* ---------- LES LETTRES ---------- */
+.h1-char {
+  display: inline-block;
+  transition: transform var(--dur-fast) var(--ease-out),
+              filter var(--dur-fast) var(--ease-out);
+  will-change: transform;
+}
+.h1-space { display: inline-block; white-space: pre; }
+
+/* Une cible doit se signaler quand on la met en joue. */
+.range.is-armed .h1-char:hover {
+  transform: translateY(-2px) scale(1.04);
+  filter: drop-shadow(0 0 12px rgba(245,197,66,.55));
+}
+
+.h1-char.is-hit {
+  pointer-events: none;
+  animation: knock-out var(--fly-d, 480ms) cubic-bezier(.3, .5, .5, 1) forwards;
+}
+@keyframes knock-out {
+  0%   { transform: none; opacity: 1; }
+  12%  { transform: translate(0, -10px) scale(1.12); filter: brightness(2.2); }
+  100% { transform: translate(var(--fly-x), 340px) rotate(var(--fly-r)) scale(.8); opacity: 0; }
+}
+
+/* Les fenêtres qui découpent les lignes à l'entrée coupent aussi les débris.
+   Elles se rouvrent une fois le titre monté. */
+.range.is-open .h1-line { overflow: visible; }
+
+/* ---------- LE VISEUR ---------- */
+/* `pointer: fine` : sur un écran tactile il n'y a pas de curseur à suivre, et
+   afficher un viseur au dernier point touché n'aurait aucun sens. Le tir au
+   doigt, lui, continue de marcher. */
+@media (pointer: fine) {
+  .range.is-armed { cursor: none; }
+  .range.is-armed .crosshair { opacity: 1; }
+}
+
+.crosshair {
+  position: absolute;
+  left: var(--aim-x, -100px);
+  top: var(--aim-y, -100px);
+  width: 46px; height: 46px;
+  margin: -23px 0 0 -23px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.crosshair .ring {
+  position: absolute; inset: 0;
+  border: 1.5px solid var(--moment-gold);
+  border-radius: 50%;
+  opacity: .85;
+}
+.crosshair .dot {
+  position: absolute; left: 50%; top: 50%;
+  width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px;
+  background: var(--moment-gold);
+  border-radius: 50%;
+}
+.crosshair .tick {
+  position: absolute;
+  background: var(--moment-gold);
+}
+.crosshair .tick.t, .crosshair .tick.b { left: 50%; width: 1.5px; height: 9px; margin-left: -.75px; }
+.crosshair .tick.l, .crosshair .tick.r { top: 50%; height: 1.5px; width: 9px; margin-top: -.75px; }
+.crosshair .tick.t { top: -13px; }
+.crosshair .tick.b { bottom: -13px; }
+.crosshair .tick.l { left: -13px; }
+.crosshair .tick.r { right: -13px; }
+
+/* Le recul : le viseur se resserre au moment du tir. Sans lui, le clic ne
+   produit aucune sensation de départ de coup. */
+.range.is-firing .crosshair { animation: recoil 220ms var(--ease-out); }
+@keyframes recoil {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(.72); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- LE SCORE ---------- */
+.range-score {
+  /* Rouvrir les fenêtres de ligne laisse la boîte des lettres déborder sous le
+     titre — line-height et padding compris — et recouvrir cette rangée. Sans
+     ce plan, un clic sur « Remettre les lettres » atteint la lettre qui passe
+     par-dessus et en dégomme une de plus. */
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-3);
+  margin: var(--sp-4) 0 0;
+  font-size: var(--text-xs);
+}
+.range-score .tnum {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--moment-gold);
+}
+.range-label {
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+.range-reset {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: var(--sp-1) var(--sp-3);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out);
+}
+.range-reset:hover { color: var(--text); border-color: var(--line-strong); }
+
+/* Le jeu se déclenche au clic : il ne s'impose à personne. Ce qui doit
+   disparaître sous mouvement réduit, c'est ce qui bouge sans qu'on l'ait
+   demandé — et la lettre doit tout de même quitter l'écran. */
+@media (prefers-reduced-motion: reduce) {
+  .h1-char { transition: none; }
+  .range.is-armed .h1-char:hover { transform: none; }
+  .h1-char.is-hit { animation: none; opacity: 0; visibility: hidden; }
+  .range.is-firing .crosshair { animation: none; }
+  .crosshair { transition: none; }
+}
