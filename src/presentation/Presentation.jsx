@@ -42,18 +42,55 @@ function useSectionSpy(ids) {
   return current
 }
 
-function Section({ id, icon, title, sub, badge, children }) {
+/* Les groupes qui entrent en scène. Passer par des sélecteurs plutôt que par
+   une prop sur chaque bloc évite d'avoir à baliser une trentaine d'endroits —
+   et un groupe oublié se voit tout de suite, il n'apparaît simplement pas. */
+const REVEAL = '.section-head, .autogrid, .split, .card.list, .panel-gold, .bullets, .panel-error'
+
+function useReveal() {
+  useEffect(() => {
+    // Personne ne doit se retrouver devant une page vide : l'état masqué n'est
+    // posé qu'une fois l'observateur en place, et jamais si le lecteur a
+    // demandé qu'on lui épargne les animations.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const root = document.documentElement
+    root.classList.add('reveal-ready')
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue
+          e.target.classList.add('is-revealed')
+          io.unobserve(e.target)   // une entrée en scène ne se rejoue pas
+        }
+      },
+      { rootMargin: '0px 0px -10% 0px', threshold: 0.05 },
+    )
+    for (const el of document.querySelectorAll(REVEAL)) io.observe(el)
+
+    return () => { io.disconnect(); root.classList.remove('reveal-ready') }
+  }, [])
+}
+
+function Section({ id, icon, title, sub, badge, moment, children }) {
   const active = useContext(CurrentSection) === id
   return (
-    <section id={id} className="section" aria-labelledby={`${id}-title`}>
+    <section
+      id={id}
+      className={`section${moment ? ' section-moment' : ''}`}
+      data-theme={moment ? 'dark' : undefined}
+      aria-labelledby={`${id}-title`}
+    >
       <div className="wrap">
-        <div className={`section-rule${active ? ' is-active' : ''}`} data-icon={icon}>
-          <span className="section-icon"><Icon name={icon} size={22} /></span>
-          <div className="bar" />
+        <div className="section-head">
+          <div className={`section-rule${active ? ' is-active' : ''}`} data-icon={icon}>
+            <span className="section-icon"><Icon name={icon} size={22} /></span>
+            <div className="bar" />
+          </div>
+          {badge && <div className="day-badge">{badge}</div>}
+          <h2 id={`${id}-title`}>{title}</h2>
+          <p className="sub">{sub}</p>
         </div>
-        {badge && <div className="day-badge">{badge}</div>}
-        <h2 id={`${id}-title`}>{title}</h2>
-        <p className="sub">{sub}</p>
         {children}
       </div>
     </section>
@@ -73,14 +110,20 @@ function Row({ k, v, color, className = 'row' }) {
 function Hero() {
   const current = useContext(CurrentSection)
   return (
-    <header className="hero">
+    <header className="hero-moment" data-theme="dark" id="hero">
+      <div className="hero">
       <div className="brandmark">{event.app}</div>
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
         <span className="kicker">{event.edition} · {event.datesLabel}</span>
         <h1>
           {event.name.map((line, i) => (
-            <span key={line} style={{ display: 'block' }}>{line}</span>
+            // Deux étages par ligne : le premier découpe la fenêtre, le second
+            // monte à l'intérieur. Le texte reste un seul nœud par ligne, donc
+            // il se lit et se sélectionne normalement.
+            <span key={line} className="h1-line" style={{ '--line-i': i }}>
+              <span>{line}</span>
+            </span>
           ))}
         </h1>
         <p className="tagline">{event.tagline}</p>
@@ -119,7 +162,55 @@ function Hero() {
           )
         })}
       </nav>
+      </div>
     </header>
+  )
+}
+
+/* La barre collante n'est pas décorative : sans elle, le sommaire disparaît au
+   premier défilement et l'état « section courante » ne se voit jamais. Elle
+   emprunte deux pièces du design system restées inutilisées, le flou de fond
+   et la variante compacte du décompte. */
+function StickyBar() {
+  const current = useContext(CurrentSection)
+  const [shown, setShown] = useState(false)
+
+  useEffect(() => {
+    const hero = document.getElementById('hero')
+    if (!hero) return
+    const io = new IntersectionObserver(([e]) => setShown(!e.isIntersecting), { threshold: 0 })
+    io.observe(hero)
+    return () => io.disconnect()
+  }, [])
+
+  return (
+    <div className={`stickybar${shown ? ' is-shown' : ''}`} data-theme="dark" aria-hidden={!shown}>
+      <div className="stickybar-in">
+        <a className="stickybar-brand" href="#hero">{event.name.join(' ')}</a>
+        <nav className="stickybar-nav" aria-label="Sections du règlement">
+          {navItems.map((n) => {
+            const active = current === n.href.slice(1)
+            return (
+              <a
+                key={n.href}
+                className={`stickypill${active ? ' is-active' : ''}`}
+                href={n.href}
+                data-icon={n.icon}
+                aria-current={active ? 'true' : undefined}
+                tabIndex={shown ? undefined : -1}
+                title={n.label}
+              >
+                <Icon name={n.icon} size={16} />
+                <span>{n.label}</span>
+              </a>
+            )
+          })}
+        </nav>
+        <div className="stickybar-cd">
+          <Countdown target={event.startsAt} variant="compact" label="J−" />
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -141,12 +232,13 @@ function Brief() {
 
 function GoldenRule() {
   return (
-    <Section id="regle" icon="book" title="La règle d'or" sub="Si vous ne lisez qu'un paragraphe, c'est celui-là.">
+    <Section
+      id="regle" icon="book" title="La règle d'or"
+      sub="Si vous ne lisez qu'un paragraphe, c'est celui-là."
+      moment
+    >
       <div className="panel-gold">
-        <p style={{
-          fontFamily: 'var(--font-display)', textTransform: 'uppercase',
-          fontSize: 'clamp(20px,2.6vw,28px)', lineHeight: 'var(--lh-snug)', margin: '0 0 24px',
-        }}>
+        <p className="rule-headline">
           Gagner des duels rapporte des jetons.<br />Gagner des paris ne rapporte aucun point.
         </p>
         <p className="prose">
@@ -158,12 +250,7 @@ function GoldenRule() {
           rentable de perdre un duel exprès. Cette année, si tu perds volontairement, tu perds des points
           bien réels et tu gagnes une monnaie qui ne te fera jamais remonter au classement.
         </p>
-        <p style={{
-          fontFamily: 'var(--font-display)', textTransform: 'uppercase',
-          fontSize: 19, color: 'var(--gold)', margin: 0,
-        }}>
-          Ça ne vaut jamais le coup. C'est fait pour.
-        </p>
+        <p className="rule-kicker">Ça ne vaut jamais le coup. C'est fait pour.</p>
       </div>
     </Section>
   )
@@ -185,7 +272,7 @@ function Saturday() {
           </p>
           <p className="prose">
             Un duel se joue en <strong>deux manches gagnantes</strong>. Chaque duel gagné rapporte en plus{' '}
-            <strong style={{ color: 'var(--jeton)' }}>10 jetons</strong> pour parier.
+            <strong style={{ color: 'var(--ink-jeton)' }}>10 jetons</strong> pour parier.
           </p>
           <p className="prose muted" style={{ marginBottom: 'var(--sp-7)' }}>
             Le point de consolation à 1–2 n'est pas décoratif : sur cinq tours, il fait la différence entre
@@ -202,7 +289,7 @@ function Saturday() {
         <div className="card list">
           <div className="card-label">Les points</div>
           {points.map((p) => (
-            <Row key={p.k} k={p.k} v={p.v} color={p.strong ? 'var(--gold)' : 'var(--text-muted)'} />
+            <Row key={p.k} k={p.k} v={p.v} color={p.strong ? 'var(--ink-brand)' : 'var(--text-muted)'} />
           ))}
         </div>
       </div>
@@ -219,7 +306,7 @@ function Betting() {
           {jetonSources.map((s) => (
             <div key={s.k} className="row" style={{ padding: '12px 20px' }}>
               <span style={{ fontSize: 'var(--text-sm)' }}>{s.k}</span>
-              <span className="tnum" style={{ color: 'var(--jeton)', fontWeight: 700 }}>{s.v}</span>
+              <span className="tnum" style={{ color: 'var(--ink-jeton)', fontWeight: 700 }}>{s.v}</span>
             </div>
           ))}
         </div>
@@ -336,7 +423,7 @@ function BestGame() {
         borderRadius: 'var(--radius-md)', padding: 'var(--sp-6)', maxWidth: 820, marginBottom: 'var(--sp-5)',
       }}>
         <p style={{ fontSize: 15, lineHeight: 'var(--lh-loose)', margin: 0 }}>
-          Le gagnant de samedi touche <strong style={{ color: 'var(--jeton)' }}>50 jetons</strong>,
+          Le gagnant de samedi touche <strong style={{ color: 'var(--ink-jeton)' }}>50 jetons</strong>,
           utilisables dès dimanche. C'est autant que si tu avais gagné tous tes duels de la journée.
         </p>
       </div>
@@ -405,7 +492,7 @@ function Propose() {
       <p className="prose last" style={{ fontSize: 15, maxWidth: 820 }}>
         Si votre jeu est retenu, vous en êtes le <strong>parrain</strong> : vous apportez le matos et vous
         expliquez la règle le jour J. Et vous démarrez avec{' '}
-        <strong style={{ color: 'var(--jeton)' }}>10 jetons de bonus</strong>.
+        <strong style={{ color: 'var(--ink-jeton)' }}>10 jetons de bonus</strong>.
       </p>
     </Section>
   )
@@ -433,9 +520,11 @@ const SECTION_IDS = navItems.map((n) => n.href.slice(1))
 
 export default function Presentation() {
   const current = useSectionSpy(SECTION_IDS)
+  useReveal()
   return (
     <CurrentSection value={current}>
     <div data-theme="light" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh', overflowX: 'hidden' }}>
+      <StickyBar />
       <Hero />
       <Brief />
       <GoldenRule />
