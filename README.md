@@ -5,7 +5,7 @@ Application web de tournoi et de paris entre amis. Générique : elle héberge d
 
 **Premier évènement : Olympiade de l'adresse**, 10 & 11 octobre 2026.
 
-👉 **[Voir la page](https://petite-olive-verte.github.io/jeux-de-l-adresse/)**
+👉 **[Voir la page](https://petite-olive-verte.github.io/betclash-event-olympiade-de-ladresse/)**
 
 ```bash
 npm install
@@ -45,5 +45,5 @@ vit dans `content.jsx`, les mises en page utilisent des grilles qui refluent
 
 Chaque push sur `main` déclenche `.github/workflows/deploy.yml`, qui construit
 le site et le publie sur GitHub Pages. Le `base` de Vite vaut
-`/jeux-de-l-adresse/` : la page est servie depuis un sous-chemin, pas depuis la
+`/betclash-event-olympiade-de-ladresse/` : la page est servie depuis un sous-chemin, pas depuis la
 racine du domaine.
