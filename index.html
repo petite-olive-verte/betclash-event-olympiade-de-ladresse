@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Les jeux de l'adresse — Règles</title>
+<meta name="description" content="Le règlement complet des jeux de l'adresse : duels, équipes, paris et classements. Deux jours, cinq titres.">
+<meta property="og:title" content="Les jeux de l'adresse">
+<meta property="og:description" content="Deux jours de jeux d'adresse. Duels, équipes, paris et cinq titres à prendre. Le règlement complet.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0d12;
+    --surface:#141821;
+    --surface-2:#1b2029;
+    --line:#272e3c;
+    --text:#e9ecf3;
+    --muted:#8d95a9;
+    --gold:#f5c542;
+    --green:#35d07f;
+    --red:#ff5f5f;
+    --blue:#5aa9ff;
+    --radius:14px;
+    --wrap:760px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%; scroll-behavior:smooth; scroll-padding-top:64px}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    font-size:16.5px;
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--wrap); margin:0 auto; padding:0 20px}
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    position:relative;
+    padding:64px 0 44px;
+    text-align:center;
+    background:
+      radial-gradient(900px 380px at 50% -140px, rgba(245,197,66,.16), transparent 70%),
+      linear-gradient(180deg, #10141c 0%, var(--bg) 100%);
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+  }
+  .kicker{
+    display:inline-block;
+    font-size:12px; font-weight:700; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--gold);
+    border:1px solid rgba(245,197,66,.35);
+    background:rgba(245,197,66,.07);
+    padding:6px 13px; border-radius:100px;
+    margin-bottom:22px;
+  }
+  h1{
+    font-family:'Anton',Impact,sans-serif;
+    font-weight:400;
+    font-size:clamp(44px,13vw,86px);
+    line-height:.92;
+    letter-spacing:.005em;
+    margin:0 0 18px;
+    text-transform:uppercase;
+  }
+  h1 .l2{color:var(--gold); display:block}
+  .tagline{color:var(--muted); font-size:17px; max-width:440px; margin:0 auto; text-wrap:balance}
+
+  .stats{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
+    max-width:var(--wrap); margin:36px auto 0; padding:0 20px;
+  }
+  .stat{
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:14px 6px;
+  }
+  .stat b{display:block; font-family:'Anton',sans-serif; font-weight:400; font-size:28px; line-height:1; color:var(--gold)}
+  .stat span{display:block; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-top:7px}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(11,13,18,.9);
+    backdrop-filter:saturate(150%) blur(12px);
+    -webkit-backdrop-filter:saturate(150%) blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .scroller{
+    display:flex; gap:6px; overflow-x:auto; padding:11px 20px;
+    max-width:var(--wrap); margin:0 auto;
+    scrollbar-width:none;
+  }
+  nav .scroller::-webkit-scrollbar{display:none}
+  nav a{
+    flex:0 0 auto; color:var(--muted); text-decoration:none;
+    font-size:13px; font-weight:600; white-space:nowrap;
+    padding:6px 12px; border-radius:100px; border:1px solid transparent;
+  }
+  nav a:hover,nav a:focus{color:var(--text); background:var(--surface-2); border-color:var(--line)}
+
+  /* ---------- SECTIONS ---------- */
+  section{padding:52px 0 8px}
+  .sec-head{display:flex; align-items:baseline; gap:12px; margin-bottom:6px}
+  .num{
+    font-family:'Anton',sans-serif; font-size:15px; color:var(--gold);
+    border:1px solid rgba(245,197,66,.3); border-radius:7px;
+    padding:2px 8px; flex:0 0 auto;
+  }
+  h2{
+    font-family:'Anton',Impact,sans-serif; font-weight:400;
+    font-size:clamp(27px,6.5vw,38px); line-height:1.06;
+    margin:0; text-transform:uppercase; letter-spacing:.01em;
+  }
+  .sub{color:var(--muted); font-size:14.5px; margin:2px 0 22px}
+  h3{font-size:16px; font-weight:700; margin:26px 0 8px; letter-spacing:.01em}
+  p{margin:0 0 14px}
+  a{color:var(--blue)}
+  strong{color:#fff; font-weight:700}
+  .green{color:var(--green)}
+  .gold{color:var(--gold)}
+
+  ul{margin:0 0 14px; padding-left:0; list-style:none}
+  ul li{position:relative; padding-left:20px; margin-bottom:9px}
+  ul li::before{
+    content:''; position:absolute; left:3px; top:.72em;
+    width:5px; height:5px; border-radius:50%; background:var(--gold); opacity:.75;
+  }
+
+  /* ---------- CARDS ---------- */
+  .card{
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:var(--radius); padding:20px 20px 8px; margin:18px 0;
+  }
+  .card.tight{padding-bottom:20px}
+  .card-title{font-size:12px; font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); margin-bottom:12px}
+
+  .rule{
+    border:1px solid rgba(245,197,66,.4);
+    background:linear-gradient(160deg, rgba(245,197,66,.11), rgba(245,197,66,.03));
+    border-radius:var(--radius); padding:22px; margin:22px 0;
+  }
+  .rule .big{
+    font-family:'Anton',sans-serif; font-size:clamp(20px,4.8vw,25px);
+    line-height:1.22; text-transform:uppercase; margin:0 0 12px; color:#fff;
+  }
+  .rule p:last-child{margin-bottom:0}
+
+  .warn{
+    border:1px solid rgba(255,95,95,.4);
+    background:rgba(255,95,95,.07);
+    border-radius:var(--radius); padding:18px 20px; margin:20px 0;
+  }
+  .warn p:last-child{margin-bottom:0}
+  .warn .lbl{font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--red); margin-bottom:8px}
+
+  /* ---------- SCORE TABLE ---------- */
+  .scores{display:grid; gap:8px; margin:6px 0 18px}
+  .row{
+    display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:10px;
+    background:var(--surface-2); border:1px solid var(--line);
+    border-radius:11px; padding:12px 15px;
+  }
+  .row .res{font-weight:600; font-size:15px}
+  .row .pts{
+    font-family:'Anton',sans-serif; font-size:20px; color:var(--gold);
+    min-width:62px; text-align:right;
+  }
+  .row .jet{font-size:12.5px; color:var(--green); min-width:74px; text-align:right; font-weight:600}
+  .row.loss .pts{color:var(--muted)}
+  .row.loss .res{color:var(--muted)}
+
+  /* ---------- FORMULA ---------- */
+  .formula{
+    background:#080a0e; border:1px solid var(--line); border-radius:11px;
+    padding:16px 18px; margin:14px 0 18px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:13.5px; line-height:1.85; color:var(--green);
+    overflow-x:auto;
+  }
+
+  /* ---------- TITLES ---------- */
+  .titles{display:grid; gap:9px; margin:6px 0 18px}
+  .title-row{
+    display:flex; align-items:center; gap:14px;
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:11px; padding:14px 16px;
+  }
+  .title-row .ico{font-size:21px; flex:0 0 auto; line-height:1}
+  .title-row .txt b{display:block; font-size:15px; letter-spacing:.01em}
+  .title-row .txt span{display:block; font-size:13px; color:var(--muted)}
+  .title-row.abs{border-color:rgba(245,197,66,.45); background:linear-gradient(160deg, rgba(245,197,66,.1), rgba(245,197,66,.02))}
+
+  /* ---------- FORMAT BLOCK ---------- */
+  .format{
+    background:#080a0e; border:1px solid var(--line); border-radius:11px;
+    padding:18px; margin:14px 0 18px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:13.5px; line-height:2; white-space:pre-wrap;
+  }
+
+  /* ---------- DAY BADGE ---------- */
+  .day{
+    display:inline-block; font-size:11px; font-weight:700; letter-spacing:.13em;
+    text-transform:uppercase; padding:4px 10px; border-radius:100px;
+    background:var(--surface-2); border:1px solid var(--line); color:var(--muted);
+    margin-bottom:14px;
+  }
+
+  hr.sep{border:0; border-top:1px solid var(--line); margin:44px 0 0}
+
+  footer{
+    text-align:center; padding:52px 20px 60px; color:var(--muted); font-size:13.5px;
+    border-top:1px solid var(--line); margin-top:52px;
+  }
+  footer .big{font-family:'Anton',sans-serif; font-size:19px; color:var(--text); text-transform:uppercase; margin-bottom:8px}
+
+  @media (max-width:480px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .row{grid-template-columns:1fr auto; row-gap:2px}
+    .row .jet{grid-column:2; text-align:right}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="kicker">Édition 2 · Deux jours</span>
+    <h1>Les jeux<span class="l2">de l'adresse</span></h1>
+    <p class="tagline">Des duels, des équipes, des paris. Cinq titres à prendre, et une seule règle qui compte vraiment.</p>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>2</b><span>jours</span></div>
+    <div class="stat"><b>5</b><span>tours de duels</span></div>
+    <div class="stat"><b>3</b><span>équipes</span></div>
+    <div class="stat"><b>5</b><span>titres</span></div>
+  </div>
+</header>
+
+<nav>
+  <div class="scroller">
+    <a href="#regle">La règle d'or</a>
+    <a href="#samedi">Samedi</a>
+    <a href="#paris">Les paris</a>
+    <a href="#dimanche">Dimanche</a>
+    <a href="#prix">Meilleur jeu</a>
+    <a href="#titres">Les titres</a>
+    <a href="#proposer">Proposer un jeu</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- 00 -->
+  <section id="brief">
+    <div class="sec-head"><span class="num">00</span><h2>Le week-end en bref</h2></div>
+    <p class="sub">Ce qu'il faut savoir avant de lire le reste.</p>
+    <p><strong>Samedi</strong>, on ne joue que des duels, un contre un, sur des jeux d'adresse apportés par vous. Cinq tours, personne n'est éliminé. Le classement du samedi soir décide des capitaines.</p>
+    <p><strong>Dimanche</strong>, on passe en équipes. Trois équipes, chacune affronte les deux autres.</p>
+    <p>Pendant tout le week-end, <strong>tout le monde parie sur les autres</strong> avec une cagnotte de jetons. Les cotes bougent en direct dans l'appli.</p>
+    <p>Et il y a <strong>cinq façons de gagner</strong> — dont une qui ne demande même pas d'être bon aux jeux d'adresse.</p>
+  </section>
+
+  <hr class="sep">
+
+  <!-- 01 -->
+  <section id="regle">
+    <div class="sec-head"><span class="num">01</span><h2>La règle d'or</h2></div>
+    <p class="sub">Si vous ne lisez qu'un paragraphe, c'est celui-là.</p>
+
+    <div class="rule">
+      <p class="big">Gagner des duels rapporte des jetons.<br>Gagner des paris ne rapporte aucun point.</p>
+      <p>Les deux classements sont totalement séparés. Il n'y a pas de passerelle, et elle ne va que dans un sens : le terrain alimente la cagnotte, jamais l'inverse.</p>
+    </div>
+
+    <p>L'an dernier c'était le contraire : parier rapportait plus que jouer, et il pouvait devenir rentable de perdre un duel exprès. Cette année, si tu perds volontairement, tu perds des points bien réels et tu gagnes une monnaie qui ne te fera jamais remonter au classement.</p>
+    <p><strong>Ça ne vaut jamais le coup. C'est fait pour.</strong></p>
+  </section>
+
+  <hr class="sep">
+
+  <!-- 02 -->
+  <section id="samedi">
+    <div class="sec-head"><span class="num">02</span><h2>Samedi — les duels</h2></div>
+    <p class="sub">Un contre un, cinq tours, tout le monde joue jusqu'au bout.</p>
+    <span class="day">Jour 1</span>
+
+    <p>On joue en <strong>système suisse</strong> : à chaque tour, l'appli t'apparie avec quelqu'un qui a à peu près ton niveau, sur un jeu que tu n'as pas encore fait. <strong>Personne n'est éliminé</strong>, tout le monde joue les cinq tours.</p>
+    <p>Un duel se joue en <strong>deux manches gagnantes</strong>.</p>
+
+    <h3>Les points</h3>
+    <div class="scores">
+      <div class="row"><span class="res">Victoire 2 – 0</span><span class="pts">4 pts</span><span class="jet">+200 jetons</span></div>
+      <div class="row"><span class="res">Victoire 2 – 1</span><span class="pts">3 pts</span><span class="jet">+150 jetons</span></div>
+      <div class="row loss"><span class="res">Défaite 1 – 2</span><span class="pts">1 pt</span><span class="jet">&nbsp;</span></div>
+      <div class="row loss"><span class="res">Défaite 0 – 2</span><span class="pts">0 pt</span><span class="jet">&nbsp;</span></div>
+    </div>
+    <p>Le point de consolation à 1–2 n'est pas décoratif : sur cinq tours, il fait la différence entre la cinquième et la dixième place. Accrochez-vous même mal partis.</p>
+
+    <h3>Le draft, samedi soir</h3>
+    <p>Les <strong>trois premiers du classement</strong> deviennent capitaines et choisissent leur équipe pour dimanche, à tour de rôle, devant tout le monde. D'où l'intérêt de bien finir la journée.</p>
+  </section>
+
+  <hr class="sep">
+
+  <!-- 03 -->
+  <section id="paris">
+    <div class="sec-head"><span class="num">03</span><h2>Les paris</h2></div>
+    <p class="sub">Pari mutuel. Personne ne fixe les cotes, c'est le groupe qui les fait.</p>
+
+    <p>Tout le monde démarre à <strong class="green">1000 jetons</strong>, plus <strong class="green">100 offerts à chaque nouveau tour</strong>. Personne ne peut se retrouver à sec et regarder le week-end depuis le banc.</p>
+    <p>Il n'y a pas de cotes décidées par quelqu'un. Tout le monde mise, et la cagnotte du duel est partagée entre les gagnants au prorata de leur mise :</p>
+
+    <div class="formula">cote = cagnotte totale ÷ ce qui est misé sur ce camp
+gain = ta mise × la cote</div>
+
+    <p>Les cotes bougent en direct dans l'appli au fur et à mesure que les mises tombent. <strong>Miser sur l'outsider quand personne n'y croit, c'est là que ça paie.</strong></p>
+
+    <div class="card">
+      <div class="card-title">Les règles du marché</div>
+      <ul>
+        <li>Mise entre <strong>50 jetons</strong> et <strong>20 % de ta cagnotte</strong>. Pas de tapis : un seul pari ne doit jamais faire basculer un classement.</li>
+        <li>Cote <strong>plafonnée à 3,0</strong>. Ce qui dépasse part dans la cagnotte de la maison, qui amorce les duels suivants.</li>
+        <li>La banque met <strong>100 jetons sur chaque duel</strong>, 50 de chaque côté. Sans ça, quand tout le monde mise sur le favori la cote tombe à 1,0 et il n'y a plus rien à gagner.</li>
+        <li>Les <strong>deux joueurs d'un duel ne parient pas dessus</strong>, ni dans un sens ni dans l'autre.</li>
+        <li>Les paris <strong>ferment quand la première manche commence</strong>. Les deux ou trois duels suivants sont affichés à l'avance : tu paries pendant que le duel en cours se joue.</li>
+        <li>Égalité, forfait, blessure : <strong>tout le monde est remboursé</strong>.</li>
+      </ul>
+    </div>
+
+    <div class="warn">
+      <div class="lbl">Match arrangé</div>
+      <p>Si un duel n'est visiblement pas joué sérieusement, le commissaire l'annule. <strong>Tous les paris sont remboursés</strong>, le duel est rejoué, et celui qui a fait le malin prend <strong>−3 points</strong>.</p>
+      <p>Le remboursement est le cœur du truc : un match truqué ne peut structurellement rien rapporter à personne.</p>
+    </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- 04 -->
+  <section id="dimanche">
+    <div class="sec-head"><span class="num">04</span><h2>Dimanche — les équipes</h2></div>
+    <p class="sub">Trois équipes, et celle qui se repose tient le marché.</p>
+    <span class="day">Jour 2</span>
+
+    <p><strong>Trois équipes</strong>, chacune affronte les deux autres. À chaque match, une équipe ne joue pas : <strong>c'est elle le public, et c'est elle qui parie.</strong></p>
+    <p>Ce n'est pas un détail d'organisation. Une équipe qui parie sur un match qu'elle ne dispute pas ne peut pas en influencer le résultat — le marché reste propre par construction, sans qu'on ait besoin d'une seule règle en plus.</p>
+    <p>En plus du vainqueur, on ouvre des <strong>paris annexes</strong> : score exact, écart, meilleur joueur du match. C'est ce qui sauve l'intérêt quand un match est joué d'avance.</p>
+  </section>
+
+  <hr class="sep">
+
+  <!-- 05 -->
+  <section id="prix">
+    <div class="sec-head"><span class="num">05</span><h2>Le prix du meilleur jeu</h2></div>
+    <p class="sub">Concevoir un bon jeu est une façon de gagner à part entière.</p>
+
+    <p>Deux votes : <strong>meilleur jeu de duel</strong> samedi soir au moment du draft, <strong>meilleur jeu d'équipe</strong> dimanche à la remise des prix.</p>
+    <p>Chacun classe ses <strong>trois jeux préférés</strong> — 3, 2 et 1 points. <strong>Interdit de voter pour le sien.</strong></p>
+
+    <div class="card">
+      <div class="card-title">On vote sur deux questions</div>
+      <ul>
+        <li><strong>Lequel tu remets l'an prochain ?</strong></li>
+        <li><strong>Lequel est le mieux réglé ?</strong> Règles claires, score incontestable, équilibré.</li>
+      </ul>
+    </div>
+
+    <p>La deuxième question n'est pas là pour décorer. Un jeu où seul son parrain gagne, ça se voit en deux duels, et ça coûte le prix. <strong>Inventez des jeux justes, pas des jeux où vous gagnez.</strong></p>
+    <p>Le gagnant de samedi touche <strong class="green">300 jetons</strong>, utilisables dès dimanche.</p>
+
+    <div class="warn" style="border-color:var(--line); background:var(--surface)">
+      <div class="lbl" style="color:var(--gold)">À noter</div>
+      <p>Ces points vont au <strong>classement des créateurs</strong>, pas au classement des duels. Le champion des duels se gagne sur le terrain, jamais par un vote.</p>
+    </div>
+  </section>
+
+  <hr class="sep">
+
+  <!-- 06 -->
+  <section id="titres">
+    <div class="sec-head"><span class="num">06</span><h2>Les cinq titres</h2></div>
+    <p class="sub">Cinq façons de gagner. Il y en a forcément une pour toi.</p>
+
+    <div class="titles">
+      <div class="title-row"><span class="ico">🎯</span><span class="txt"><b>Champion des duels</b><span>Samedi, individuel</span></span></div>
+      <div class="title-row"><span class="ico">👥</span><span class="txt"><b>Équipe championne</b><span>Dimanche, collectif</span></span></div>
+      <div class="title-row"><span class="ico">🎲</span><span class="txt"><b>Meilleur parieur</b><span>En jetons, sur les deux jours</span></span></div>
+      <div class="title-row"><span class="ico">🏅</span><span class="txt"><b>Meilleur créateur</b><span>Le cumul des deux votes</span></span></div>
+      <div class="title-row abs"><span class="ico">🏆</span><span class="txt"><b>Champion absolu</b><span>Le meilleur cumul des quatre classements</span></span></div>
+    </div>
+
+    <p>Nul aux jeux d'adresse mais bon lecteur de gens ? Il y a un titre pour toi. Mauvais parieur mais bon inventeur ? Aussi.</p>
+  </section>
+
+  <hr class="sep">
+
+  <!-- 07 -->
+  <section id="proposer">
+    <div class="sec-head"><span class="num">07</span><h2>Proposer un jeu</h2></div>
+    <p class="sub">Un jeu par personne. Connu ou inventé, peu importe.</p>
+
+    <div class="card">
+      <div class="card-title">Les contraintes — lisez-les vraiment</div>
+      <ul>
+        <li>Une manche fait <strong>moins de 10 minutes</strong>.</li>
+        <li>Matériel <strong>déjà à la maison, ou moins de 10 €</strong>.</li>
+        <li>La règle <strong>s'explique en 30 secondes</strong>.</li>
+        <li>C'est de <strong>l'adresse, pas de la force</strong>. Tout le monde doit pouvoir jouer.</li>
+        <li>Le <strong>score est clair et incontestable</strong>. Pas de « c'était plus beau ».</li>
+        <li>On peut <strong>l'enchaîner en boucle</strong> toute la journée.</li>
+      </ul>
+    </div>
+
+    <h3>Le format</h3>
+    <div class="format">🎯 Nom
+⚙️ Matériel
+📖 Règle (3 lignes max)
+🏆 Comment on gagne
+👥 Duel / Équipe / Les deux
+⏱️ Durée d'une manche</div>
+
+    <h3>Si votre jeu est retenu</h3>
+    <p>Vous en êtes le <strong>parrain</strong> : vous apportez le matos et vous expliquez la règle le jour J. Et vous démarrez avec <strong class="green">100 jetons de bonus</strong>.</p>
+  </section>
+
+  <hr class="sep">
+
+  <!-- 08 -->
+  <section id="roles">
+    <div class="sec-head"><span class="num">08</span><h2>Qui fait quoi</h2></div>
+    <p class="sub">Trois rôles, et une seule voix qui tranche.</p>
+
+    <div class="card tight">
+      <ul>
+        <li><strong>Le commissaire</strong> — il tranche les litiges. Sa décision est finale, pas de débat.</li>
+        <li><strong>Le greffier</strong> — il saisit les scores dans l'appli.</li>
+        <li><strong>Les parrains</strong> — matériel et règles de leur jeu.</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="big">Les jeux de l'adresse</div>
+  <p>Édition 2 · Le règlement peut encore bouger d'ici le jour J.<br>Les questions et les contestations, c'est dans le groupe.</p>
+</footer>
+
+</body>
+</html>
