@@ -28,8 +28,28 @@ src/
     content.jsx        tout le texte et les réglages de l'évènement
     Presentation.jsx   la page
     icons.jsx          Lucide, encré par rôle
+    ShootingRange.jsx  le titre, et le stand de tir qui va avec
+    shotSound.js       les sons, synthétisés — aucun fichier
     presentation.css   composition + responsive
+    shooting.css       viseur, lettres lâchées, panneau latéral
 ```
+
+Le titre s'appelle « Olympiade de l'adresse », alors on peut lui tirer dessus :
+un viseur suit la souris, un clic dégomme une lettre. Au premier tir le reste
+du hero s'efface, les lettres se rassemblent au centre de l'écran et s'en
+dispersent — de plus en plus vite à mesure qu'elles tombent.
+
+Le chargeur est limité : une balle par coup, touché ou manqué. Toutes les
+lettres à terre, c'est « Oh wow » et le décompte jusqu'au jour J ; le chargeur
+vide avant, c'est « Bouu ». Les deux proposent de reprendre la lecture, et une
+flèche sur le côté remet la page comme avant à tout moment.
+
+Le temps d'une partie la page ne défile plus : les lettres sont ancrées à la
+fenêtre et le décor a disparu, défiler ne montrerait qu'un vide. Le défilement
+est rendu, à la position exacte où il avait été pris, dès qu'on quitte.
+
+Le jeu ne se déclenche qu'au clic, le titre garde son nom accessible, et sans
+souris, sans JS ou sous `prefers-reduced-motion`, il reste un titre.
 
 Les fichiers de `ds/tokens/` sont copiés à l'identique de Claude Design, à une
 exception près : le bloc `encres d'icône` de `colors.css`, ajouté ici et marqué

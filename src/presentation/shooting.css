@@ -1,0 +1,361 @@
+/* ═════════════════════════════════════════════════════ STAND DE TIR
+   L'évènement s'appelle « Olympiade de l'adresse » : son titre se prête à ce
+   qu'on lui tire dessus. Le viseur suit la souris, un clic dégomme une lettre.
+   Au premier tir le reste du hero s'efface, les lettres se détachent et
+   parcourent l'écran — de plus en plus vite à mesure qu'elles tombent.
+
+   Rien ici n'est nécessaire pour lire la page. Sans souris, sans JS ou sans
+   mouvement, le titre reste un titre : c'est la seule contrainte qui compte. */
+
+.range { position: relative; }
+
+/* ---------- LE PLATEAU SE VIDE ----------
+   Une fois la partie lancée, tout ce qui n'est pas le titre s'efface : le
+   décompte, les boutons et le sommaire cesseraient d'être lisibles avec des
+   lettres qui leur passent devant, et resteraient cliquables sans être vus. */
+/* Le deuxième enfant du hero est le bloc qui porte le titre : tout le reste
+   s'en va. Viser la position plutôt que les classes évite d'oublier un bloc
+   ajouté plus tard.
+
+   `!important` n'est pas une facilité ici : ces éléments sont entrés en scène
+   avec une animation `forwards`, et le remplissage d'une animation l'emporte
+   sur une déclaration normale. Sans lui, la moitié du hero refuse de partir —
+   exactement ce qu'on observait : le kicker et le tagline s'effaçaient, les
+   stats et le sommaire restaient. */
+.range.is-playing .hero > *:not(:nth-child(2)),
+.range.is-playing .kicker,
+.range.is-playing .tagline {
+  opacity: 0 !important;
+  pointer-events: none;
+  /* `visibility` prend le relais une fois le fondu fini : transparent ne veut
+     pas dire absent — un élément à `opacity: 0` reste lu par les lecteurs
+     d'écran et attrape encore le focus au clavier. */
+  visibility: hidden;
+  transition: opacity var(--dur-slow) var(--ease-out),
+              visibility 0s linear var(--dur-slow);
+}
+/* Le hero garde sa hauteur : les lettres quittent le flux, et sans cela la
+   page remonterait d'un coup sous le curseur. */
+.range.is-playing .hero { min-height: 78vh; }
+.range.is-playing .hero h1 { min-height: 1px; }
+
+/* ---------- LES LETTRES ---------- */
+.h1-char {
+  display: inline-block;
+  transition: transform var(--dur-fast) var(--ease-out),
+              filter var(--dur-fast) var(--ease-out);
+}
+.h1-space { display: inline-block; white-space: pre; }
+
+/* Une cible doit se signaler quand on la met en joue. */
+.range.is-armed .h1-char:hover {
+  filter: drop-shadow(0 0 14px rgba(245,197,66,.6));
+}
+
+/* Détachée : la lettre quitte le flux et se place où la boucle la met. Le
+   détachement tient dans cette seule règle, donc retirer `is-playing` la
+   ramène exactement d'où elle vient — aucun style à défaire.
+   Pas de transition sur `transform` : pilotée image par image, elle traînerait
+   d'une image sur l'autre. */
+.range.is-playing .h1-char {
+  position: fixed;
+  left: 0; top: 0;
+  margin: 0;
+  width: var(--w); height: var(--h);
+  transform: translate3d(var(--x, 0), var(--y, 0), 0);
+  transition: filter var(--dur-fast) var(--ease-out);
+  z-index: 4;
+}
+
+.h1-char.is-hit {
+  pointer-events: none;
+  animation: knock-out var(--fly-d, 480ms) cubic-bezier(.3, .5, .5, 1) forwards;
+}
+@keyframes knock-out {
+  0%   { opacity: 1; filter: brightness(2.4); }
+  100% { opacity: 0; filter: none; }
+}
+/* Détachée, la lettre est positionnée par `transform` : le knock-out ne peut
+   plus s'en servir sans la renvoyer à l'origine. Il ne joue que l'extinction. */
+
+/* Les fenêtres qui découpent les lignes à l'entrée coupent aussi les lettres
+   qui s'échappent. Elles se rouvrent une fois le titre monté. */
+.range.is-open .h1-line { overflow: visible; }
+
+/* ---------- L'INDICE TACTILE ----------
+   Posé en absolu sous le titre : il ne décale rien, donc l'ajouter ou le
+   retirer ne fait pas bouger la page d'un pixel. */
+.title-wrap { position: relative; }
+.range-hint {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  transform: translateX(-50%);
+  align-items: center;
+  gap: var(--sp-2);
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+.range-hint > svg { color: var(--moment-gold); }
+
+/* `pointer: coarse` : là où il y a un curseur, le viseur au survol dit déjà
+   tout. L'indice ne s'affiche que là où ce signal n'existe pas. */
+@media (pointer: coarse) {
+  /* L'indice a besoin de sa ligne. En absolu sans réserver de place, il se
+     posait par-dessus le tagline — les deux textes se mélangeaient et aucun
+     des deux ne se lisait. La réserve reste après la disparition de l'indice,
+     de sorte que rien ne saute au premier tir. */
+  .title-wrap { padding-bottom: 30px; }
+  .range-hint {
+    display: inline-flex;
+    animation: hint-in var(--dur-slow) var(--ease-out) 1800ms backwards,
+               hint-breathe 2.8s ease-in-out 2400ms infinite;
+  }
+}
+@keyframes hint-in { from { opacity: 0; transform: translate(-50%, 8px) } to { opacity: 1; transform: translateX(-50%) } }
+@keyframes hint-breathe { 0%, 100% { opacity: .55 } 50% { opacity: 1 } }
+
+/* ---------- LE VISEUR ---------- */
+/* `pointer: fine` : sur un écran tactile il n'y a pas de curseur à suivre, et
+   afficher un viseur au dernier point touché n'aurait aucun sens. Le tir au
+   doigt continue de marcher. */
+@media (pointer: fine) {
+  .range.is-armed { cursor: none; }
+  .range.is-armed .crosshair { opacity: 1; }
+}
+
+.crosshair {
+  position: absolute;
+  left: var(--aim-x, -200px);
+  top: var(--aim-y, -200px);
+  width: 46px; height: 46px;
+  margin: -23px 0 0 -23px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 6;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+.crosshair .ring {
+  position: absolute; inset: 0;
+  border: 1.5px solid var(--moment-gold);
+  border-radius: 50%;
+  opacity: .85;
+}
+.crosshair .dot {
+  position: absolute; left: 50%; top: 50%;
+  width: 3px; height: 3px; margin: -1.5px 0 0 -1.5px;
+  background: var(--moment-gold); border-radius: 50%;
+}
+.crosshair .tick { position: absolute; background: var(--moment-gold); }
+.crosshair .tick.t, .crosshair .tick.b { left: 50%; width: 1.5px; height: 9px; margin-left: -.75px; }
+.crosshair .tick.l, .crosshair .tick.r { top: 50%; height: 1.5px; width: 9px; margin-top: -.75px; }
+.crosshair .tick.t { top: -13px; }
+.crosshair .tick.b { bottom: -13px; }
+.crosshair .tick.l { left: -13px; }
+.crosshair .tick.r { right: -13px; }
+
+/* Le recul : le viseur se resserre au moment du tir. Sans lui, le clic ne
+   produit aucune sensation de départ de coup. */
+.range.is-firing .crosshair { animation: recoil 220ms var(--ease-out); }
+@keyframes recoil {
+  0% { transform: scale(1); } 35% { transform: scale(.72); } 100% { transform: scale(1); }
+}
+
+/* ---------- LE PANNEAU LATÉRAL ---------- */
+.range-side {
+  position: fixed;
+  right: var(--sp-5);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.range-gauge {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--moment-gold);
+  line-height: 1;
+}
+.range-gauge .tnum span { font-size: var(--text-xs); color: var(--text-muted); }
+.range-tag {
+  font-family: var(--font-body);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-muted);
+}
+/* Les trois dernières balles se signalent : c'est le moment où le joueur doit
+   arrêter d'arroser. */
+.range-gauge.is-low .tnum { color: var(--market-down); animation: pulse 900ms ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .45 } }
+.range-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px; height: 42px;
+  font-size: 15px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  -webkit-backdrop-filter: var(--backdrop-blur);
+  backdrop-filter: var(--backdrop-blur);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.range-icon:hover {
+  color: var(--moment-gold);
+  border-color: color-mix(in srgb, var(--moment-gold) 45%, transparent);
+  transform: rotate(-40deg);
+}
+.range-mute:hover { transform: none; }
+.range-done {
+  margin: 0;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--moment-gold);
+  writing-mode: vertical-rl;
+}
+
+@media (max-width: 760px) {
+  .range-side { right: var(--sp-3); gap: var(--sp-2); }
+  .range-icon { width: 38px; height: 38px; }
+}
+
+/* Le jeu se déclenche au clic : il ne s'impose à personne. Sous mouvement
+   réduit les lettres ne dérivent pas — la boucle n'est même pas lancée — mais
+   elles doivent tout de même quitter l'écran quand on les touche. */
+@media (prefers-reduced-motion: reduce) {
+  @media (pointer: coarse) { .range-hint { animation: none; opacity: 1; } }
+  .h1-char { transition: none; }
+  .range.is-armed .h1-char:hover { filter: none; }
+  .h1-char.is-hit { animation: none; opacity: 0; visibility: hidden; }
+  .range.is-firing .crosshair { animation: none; }
+  .crosshair, .range-icon { transition: none; }
+  .range-icon:hover { transform: none; }
+  .range.is-playing .hero > *:not(:nth-child(2)),
+  .range.is-playing .kicker,
+  .range.is-playing .tagline { transition: none; }
+}
+
+/* ═══════════════════════════════════════════════════════ FIN DE PARTIE */
+.range-end {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-6);
+  cursor: auto;
+  background: radial-gradient(60% 60% at 50% 45%, rgba(58,26,82,.82) 0%, rgba(11,13,18,.92) 100%);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: veil var(--dur-slow) var(--ease-out) backwards;
+}
+@keyframes veil { from { opacity: 0 } to { opacity: 1 } }
+
+.range-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-5);
+  text-align: center;
+  max-width: 560px;
+  animation: card-in calc(var(--dur-slow) * 1.6) cubic-bezier(.2,.8,.25,1) 120ms backwards;
+}
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(28px) scale(.94) }
+  to   { opacity: 1; transform: none }
+}
+
+/* Le verdict monte lettre par lettre derrière une fenêtre qui le découpe —
+   même geste que le titre au chargement, pour que la fin réponde au début. */
+.range-verdict {
+  margin: 0;
+  display: flex;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: var(--display-lg);
+  line-height: var(--lh-tight);
+  color: var(--moment-gold);
+}
+/* Lu, jamais vu. */
+.visuallyhidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.verdict-sp { width: .28em; flex: none; }
+.verdict-l {
+  display: inline-block;
+  animation: verdict-rise calc(var(--dur-slow) * 1.7) cubic-bezier(.2,.9,.2,1) backwards;
+  animation-delay: calc(240ms + var(--l) * 90ms);
+}
+@keyframes verdict-rise {
+  from { opacity: 0; transform: translateY(90%) rotate(-8deg) }
+  to   { opacity: 1; transform: none }
+}
+/* La classe vit sur le stand, pas sur le verdict : `.range-win` ne
+   correspondait à rien et « Bouu » restait doré. */
+.range.is-win .range-verdict { text-shadow: 0 0 42px rgba(245,197,66,.55); }
+.range.is-lose .range-verdict {
+  color: var(--market-down);
+  text-shadow: 0 0 42px rgba(255,95,95,.4);
+}
+
+.range-line {
+  margin: 0;
+  font-size: var(--text-md);
+  color: var(--text);
+  max-width: 34ch;
+  animation: rise-sm var(--dur-slow) var(--ease-out) 620ms backwards;
+}
+.range-line-sub { font-size: var(--text-sm); color: var(--text-muted); }
+.range-card > :nth-child(3) { animation: rise-sm var(--dur-slow) var(--ease-out) 760ms backwards; }
+.range-actions {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: rise-sm var(--dur-slow) var(--ease-out) 900ms backwards;
+}
+@keyframes rise-sm { from { opacity: 0; transform: translateY(14px) } to { opacity: 1; transform: none } }
+
+.range-again { display: inline-flex; align-items: center; gap: var(--sp-2); }
+
+/* Le viseur n'a plus rien à viser une fois la partie finie. */
+.range.is-win .crosshair, .range.is-lose .crosshair { opacity: 0 !important; }
+.range.is-win, .range.is-lose { cursor: auto !important; }
+
+@media (max-width: 620px) {
+  .range-verdict { font-size: var(--display-md); }
+  .range-card { gap: var(--sp-4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .range-end, .range-card, .verdict-l, .range-line,
+  .range-card > :nth-child(3), .range-actions { animation: none; }
+  .range-gauge.is-low .tnum { animation: none; }
+}

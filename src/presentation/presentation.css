@@ -545,9 +545,14 @@ footer.page-footer {
 }
 .h1-line > span { display: block; }
 
+/* `backwards` et non `forwards` : l'animation finit sur `transform: none`, mais
+   un remplissage avant garde la valeur calculée à `matrix(1,0,0,1,0,0)`. Une
+   matrice, fût-elle l'identité, crée un bloc conteneur pour les descendants en
+   `position: fixed` — les lettres lâchées se plaçaient alors par rapport à leur
+   ligne au lieu de la fenêtre. En `backwards`, l'état de départ ne couvre que
+   le délai et l'élément revient ensuite à son style de base, sans transform. */
 .reveal-ready .h1-line > span {
-  transform: translateY(110%);
-  animation: line-rise calc(var(--reveal-dur) * 1.25) var(--ease-reveal) forwards;
+  animation: line-rise calc(var(--reveal-dur) * 1.25) var(--ease-reveal) backwards;
   animation-delay: calc(300ms + var(--line-i) * var(--reveal-step) * 1.4);
 }
 @keyframes line-rise {
@@ -585,9 +590,10 @@ footer.page-footer {
   from { opacity: 0; transform: translateY(var(--reveal-shift)) scale(.94); box-shadow: none; }
   to   { opacity: 1; transform: none; box-shadow: var(--shadow-gold-glow); }
 }
+/* Même raison : `forwards` laissait une matrice identité sur chaque bloc du
+   hero, autant de blocs conteneurs parasites. */
 .reveal-ready .hero > * {
-  opacity: 0;
-  animation: rise var(--reveal-dur) var(--ease-reveal) forwards;
+  animation: rise var(--reveal-dur) var(--ease-reveal) backwards;
 }
 .reveal-ready .hero > *:nth-child(1) { animation-delay: 80ms; }
 .reveal-ready .hero > *:nth-child(2) { animation-delay: 200ms; }
@@ -608,4 +614,5 @@ footer.page-footer {
   .reveal-ready .hero h1::before,
   .reveal-ready .h1-line > span,
   .reveal-ready .hero .cd-grid { animation: none; opacity: 1; transform: none; }
+  .reveal-ready .hero .cd-grid { box-shadow: var(--shadow-gold-glow); }
 }

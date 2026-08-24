@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { Button, Countdown } from '../ds'
 import { Icon } from './icons.jsx'
+import { ShootableTitle, ShootingRange } from './ShootingRange.jsx'
 import {
   event, stats, navItems, brief, points, jetonSources, bettingRules,
   titles, constraints, proposalFormat, roles,
@@ -111,21 +112,13 @@ function Hero() {
   const current = useContext(CurrentSection)
   return (
     <header className="hero-moment" data-theme="dark" id="hero">
+      <ShootingRange>
       <div className="hero">
       <div className="brandmark">{event.app}</div>
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
         <span className="kicker">{event.edition} · {event.datesLabel}</span>
-        <h1>
-          {event.name.map((line, i) => (
-            // Deux étages par ligne : le premier découpe la fenêtre, le second
-            // monte à l'intérieur. Le texte reste un seul nœud par ligne, donc
-            // il se lit et se sélectionne normalement.
-            <span key={line} className="h1-line" style={{ '--line-i': i }}>
-              <span>{line}</span>
-            </span>
-          ))}
-        </h1>
+        <ShootableTitle lines={event.name} />
         <p className="tagline">{event.tagline}</p>
       </div>
 
@@ -163,6 +156,7 @@ function Hero() {
         })}
       </nav>
       </div>
+      </ShootingRange>
     </header>
   )
 }
