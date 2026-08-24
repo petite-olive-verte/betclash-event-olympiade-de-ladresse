@@ -35,6 +35,22 @@ Les fichiers de `ds/tokens/` sont copiés à l'identique de Claude Design, à un
 exception près : le bloc `encres d'icône` de `colors.css`, ajouté ici et marqué
 comme tel. À reporter en amont en cas de resynchronisation.
 
+## Deux registres
+
+Le design system de BetClash en définit deux, et la page se servait d'un seul.
+
+Le **registre « marché »** — dense, clair, `--text-*`, cartes et listes — porte
+le règlement : c'est du texte long, il faut pouvoir le lire.
+
+Le **registre « moment »** — `--moment-bg`, `--display-xl`, `--shadow-gold-glow`,
+décrit dans les tokens comme des fonds saturés pleine largeur et du texte « lu à
+3 mètres » — porte le hero et la règle d'or. Ce sont les deux endroits où la page
+annonce plutôt qu'elle n'explique.
+
+Une section repasse dans le registre sombre avec `data-theme="dark"`. Ça
+supposait un changement dans `colors.css` : la palette sombre vivait sur `:root`
+seul, donc impossible à retrouver une fois entré dans un sous-arbre clair.
+
 ## Trois principes hérités du design system
 
 **Les rôles de couleur sont séparés.** `--jeton` n'est pas `--success`,

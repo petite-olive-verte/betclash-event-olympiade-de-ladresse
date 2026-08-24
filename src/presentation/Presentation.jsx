@@ -42,10 +42,15 @@ function useSectionSpy(ids) {
   return current
 }
 
-function Section({ id, icon, title, sub, badge, children }) {
+function Section({ id, icon, title, sub, badge, moment, children }) {
   const active = useContext(CurrentSection) === id
   return (
-    <section id={id} className="section" aria-labelledby={`${id}-title`}>
+    <section
+      id={id}
+      className={`section${moment ? ' section-moment' : ''}`}
+      data-theme={moment ? 'dark' : undefined}
+      aria-labelledby={`${id}-title`}
+    >
       <div className="wrap">
         <div className={`section-rule${active ? ' is-active' : ''}`} data-icon={icon}>
           <span className="section-icon"><Icon name={icon} size={22} /></span>
@@ -73,7 +78,8 @@ function Row({ k, v, color, className = 'row' }) {
 function Hero() {
   const current = useContext(CurrentSection)
   return (
-    <header className="hero">
+    <header className="hero-moment" data-theme="dark" id="hero">
+      <div className="hero">
       <div className="brandmark">{event.app}</div>
 
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
@@ -119,7 +125,55 @@ function Hero() {
           )
         })}
       </nav>
+      </div>
     </header>
+  )
+}
+
+/* La barre collante n'est pas décorative : sans elle, le sommaire disparaît au
+   premier défilement et l'état « section courante » ne se voit jamais. Elle
+   emprunte deux pièces du design system restées inutilisées, le flou de fond
+   et la variante compacte du décompte. */
+function StickyBar() {
+  const current = useContext(CurrentSection)
+  const [shown, setShown] = useState(false)
+
+  useEffect(() => {
+    const hero = document.getElementById('hero')
+    if (!hero) return
+    const io = new IntersectionObserver(([e]) => setShown(!e.isIntersecting), { threshold: 0 })
+    io.observe(hero)
+    return () => io.disconnect()
+  }, [])
+
+  return (
+    <div className={`stickybar${shown ? ' is-shown' : ''}`} data-theme="dark" aria-hidden={!shown}>
+      <div className="stickybar-in">
+        <a className="stickybar-brand" href="#hero">{event.name.join(' ')}</a>
+        <nav className="stickybar-nav" aria-label="Sections du règlement">
+          {navItems.map((n) => {
+            const active = current === n.href.slice(1)
+            return (
+              <a
+                key={n.href}
+                className={`stickypill${active ? ' is-active' : ''}`}
+                href={n.href}
+                data-icon={n.icon}
+                aria-current={active ? 'true' : undefined}
+                tabIndex={shown ? undefined : -1}
+                title={n.label}
+              >
+                <Icon name={n.icon} size={16} />
+                <span>{n.label}</span>
+              </a>
+            )
+          })}
+        </nav>
+        <div className="stickybar-cd">
+          <Countdown target={event.startsAt} variant="compact" label="J−" />
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -141,12 +195,13 @@ function Brief() {
 
 function GoldenRule() {
   return (
-    <Section id="regle" icon="book" title="La règle d'or" sub="Si vous ne lisez qu'un paragraphe, c'est celui-là.">
+    <Section
+      id="regle" icon="book" title="La règle d'or"
+      sub="Si vous ne lisez qu'un paragraphe, c'est celui-là."
+      moment
+    >
       <div className="panel-gold">
-        <p style={{
-          fontFamily: 'var(--font-display)', textTransform: 'uppercase',
-          fontSize: 'clamp(20px,2.6vw,28px)', lineHeight: 'var(--lh-snug)', margin: '0 0 24px',
-        }}>
+        <p className="rule-headline">
           Gagner des duels rapporte des jetons.<br />Gagner des paris ne rapporte aucun point.
         </p>
         <p className="prose">
@@ -158,12 +213,7 @@ function GoldenRule() {
           rentable de perdre un duel exprès. Cette année, si tu perds volontairement, tu perds des points
           bien réels et tu gagnes une monnaie qui ne te fera jamais remonter au classement.
         </p>
-        <p style={{
-          fontFamily: 'var(--font-display)', textTransform: 'uppercase',
-          fontSize: 19, color: 'var(--gold)', margin: 0,
-        }}>
-          Ça ne vaut jamais le coup. C'est fait pour.
-        </p>
+        <p className="rule-kicker">Ça ne vaut jamais le coup. C'est fait pour.</p>
       </div>
     </Section>
   )
@@ -185,7 +235,7 @@ function Saturday() {
           </p>
           <p className="prose">
             Un duel se joue en <strong>deux manches gagnantes</strong>. Chaque duel gagné rapporte en plus{' '}
-            <strong style={{ color: 'var(--jeton)' }}>10 jetons</strong> pour parier.
+            <strong style={{ color: 'var(--ink-jeton)' }}>10 jetons</strong> pour parier.
           </p>
           <p className="prose muted" style={{ marginBottom: 'var(--sp-7)' }}>
             Le point de consolation à 1–2 n'est pas décoratif : sur cinq tours, il fait la différence entre
@@ -202,7 +252,7 @@ function Saturday() {
         <div className="card list">
           <div className="card-label">Les points</div>
           {points.map((p) => (
-            <Row key={p.k} k={p.k} v={p.v} color={p.strong ? 'var(--gold)' : 'var(--text-muted)'} />
+            <Row key={p.k} k={p.k} v={p.v} color={p.strong ? 'var(--ink-brand)' : 'var(--text-muted)'} />
           ))}
         </div>
       </div>
@@ -219,7 +269,7 @@ function Betting() {
           {jetonSources.map((s) => (
             <div key={s.k} className="row" style={{ padding: '12px 20px' }}>
               <span style={{ fontSize: 'var(--text-sm)' }}>{s.k}</span>
-              <span className="tnum" style={{ color: 'var(--jeton)', fontWeight: 700 }}>{s.v}</span>
+              <span className="tnum" style={{ color: 'var(--ink-jeton)', fontWeight: 700 }}>{s.v}</span>
             </div>
           ))}
         </div>
@@ -336,7 +386,7 @@ function BestGame() {
         borderRadius: 'var(--radius-md)', padding: 'var(--sp-6)', maxWidth: 820, marginBottom: 'var(--sp-5)',
       }}>
         <p style={{ fontSize: 15, lineHeight: 'var(--lh-loose)', margin: 0 }}>
-          Le gagnant de samedi touche <strong style={{ color: 'var(--jeton)' }}>50 jetons</strong>,
+          Le gagnant de samedi touche <strong style={{ color: 'var(--ink-jeton)' }}>50 jetons</strong>,
           utilisables dès dimanche. C'est autant que si tu avais gagné tous tes duels de la journée.
         </p>
       </div>
@@ -405,7 +455,7 @@ function Propose() {
       <p className="prose last" style={{ fontSize: 15, maxWidth: 820 }}>
         Si votre jeu est retenu, vous en êtes le <strong>parrain</strong> : vous apportez le matos et vous
         expliquez la règle le jour J. Et vous démarrez avec{' '}
-        <strong style={{ color: 'var(--jeton)' }}>10 jetons de bonus</strong>.
+        <strong style={{ color: 'var(--ink-jeton)' }}>10 jetons de bonus</strong>.
       </p>
     </Section>
   )
@@ -436,6 +486,7 @@ export default function Presentation() {
   return (
     <CurrentSection value={current}>
     <div data-theme="light" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh', overflowX: 'hidden' }}>
+      <StickyBar />
       <Hero />
       <Brief />
       <GoldenRule />

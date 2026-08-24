@@ -1,4 +1,8 @@
-:root{
+:root, [data-theme="dark"]{
+  /* La palette sombre vivait sur :root seul, donc impossible à retrouver une
+     fois entré dans un sous-arbre clair. La rendre atteignable par
+     [data-theme="dark"] permet à une section de repasser dans le registre
+     sombre au milieu d'une page claire — c'est ce que fait le hero. */
   /* ---- base neutrals (from règlement page) ---- */
   --bg:#0b0d12;
   --surface:#141821;
