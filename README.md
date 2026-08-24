@@ -40,7 +40,7 @@ du hero s'efface, les lettres se rassemblent au centre de l'écran et s'en
 dispersent — de plus en plus vite à mesure qu'elles tombent.
 
 Le chargeur est limité : une balle par coup, touché ou manqué. Toutes les
-lettres à terre, c'est « Bravo » et le décompte jusqu'au jour J ; le chargeur
+lettres à terre, c'est « Oh wow » et le décompte jusqu'au jour J ; le chargeur
 vide avant, c'est « Bouu ». Les deux proposent de reprendre la lecture, et une
 flèche sur le côté remet la page comme avant à tout moment.
 

@@ -258,6 +258,16 @@
   line-height: var(--lh-tight);
   color: var(--moment-gold);
 }
+/* Lu, jamais vu. */
+.visuallyhidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.verdict-sp { width: .28em; flex: none; }
 .verdict-l {
   display: inline-block;
   animation: verdict-rise calc(var(--dur-slow) * 1.7) cubic-bezier(.2,.9,.2,1) backwards;

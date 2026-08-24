@@ -298,19 +298,29 @@ export function ShootingRange({ children }) {
           <div className="range-end" role="dialog" aria-modal="true" aria-labelledby="fin-titre">
             <div className="range-card">
               <p className="range-verdict" id="fin-titre">
-                {(outcome === 'win' ? 'Bravo' : 'Bouu').split('').map((c, i) => (
-                  <span key={i} className="verdict-l" style={{ '--l': i }}>{c}</span>
-                ))}
+                {/* Le damier de lettres est décoratif : son espace n'en est
+                    pas une pour un lecteur d'écran, qui entendrait « Ohwow ».
+                    Le texte lu est donc porté à part — ce paragraphe nomme la
+                    boîte de dialogue, il ne peut pas se permettre d'être
+                    approximatif. */}
+                <span className="visuallyhidden">{outcome === 'win' ? 'Oh wow' : 'Bouu'}</span>
+                {[...(outcome === 'win' ? 'Oh wow' : 'Bouu')].map((c, i) =>
+                  // Le verdict est une rangée en flex : une espace dans un
+                  // span n'y prend aucune largeur. Il lui faut sa propre case.
+                  c === ' '
+                    ? <span key={i} className="verdict-sp" aria-hidden="true" />
+                    : <span key={i} className="verdict-l" style={{ '--l': i }} aria-hidden="true">{c}</span>,
+                )}
               </p>
 
               <p className="range-line">
                 {outcome === 'win'
-                  ? <>Tu es déjà prêt pour le jour J.</>
-                  : <>Il va falloir encore t'entraîner. Il ne te reste que&nbsp;:</>}
+                  ? <>Ça m'étonne de toi, mais bravo.</>
+                  : <>T'es nulll.</>}
               </p>
 
               <Countdown target={event.startsAt} variant="hero"
-                         label={outcome === 'win' ? 'Il reste' : 'Pour te refaire'} />
+                         label={outcome === 'win' ? 'Il reste' : 'Il ne te reste que'} />
 
               {outcome === 'lose' && (
                 <p className="range-line range-line-sub">
