@@ -15,15 +15,13 @@
 
 .section-rule {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 14px;
   margin-bottom: var(--sp-5);
 }
-.section-rule .num {
-  font-family: var(--font-display);
-  color: var(--gold);
-  font-size: 13px;
-  letter-spacing: var(--tracking-widest);
+.section-rule .section-icon {
+  display: flex;
+  flex: none;
 }
 .section-rule .bar { flex: 1; height: 1px; background: var(--line); }
 

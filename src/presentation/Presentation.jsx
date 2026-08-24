@@ -13,12 +13,13 @@ const ICONS = {
   trophy: IconTrophy, gear: IconGear, book: IconBook, clock: IconClock,
 }
 
-function Section({ id, num, title, sub, badge, children }) {
+function Section({ id, icon, title, sub, badge, children }) {
+  const Icon = ICONS[icon]
   return (
     <section id={id} className="section" aria-labelledby={`${id}-title`}>
       <div className="wrap">
         <div className="section-rule">
-          <span className="num">{num}</span>
+          <span className="section-icon"><Icon size={22} /></span>
           <div className="bar" />
         </div>
         {badge && <div className="day-badge">{badge}</div>}
@@ -83,7 +84,7 @@ function Hero() {
 /* ------------------------------------------------------------ SECTIONS */
 function Brief() {
   return (
-    <Section id="bref" num="00" title="Le week-end en bref" sub="Ce qu'il faut savoir avant de lire le reste.">
+    <Section id="bref" icon="clock" title="Le week-end en bref" sub="Ce qu'il faut savoir avant de lire le reste.">
       <div className="autogrid c260">
         {brief.map((b) => (
           <div key={b.day} className="card pad" style={{ padding: 28 }}>
@@ -98,7 +99,7 @@ function Brief() {
 
 function GoldenRule() {
   return (
-    <Section id="regle" num="01" title="La règle d'or" sub="Si vous ne lisez qu'un paragraphe, c'est celui-là.">
+    <Section id="regle" icon="book" title="La règle d'or" sub="Si vous ne lisez qu'un paragraphe, c'est celui-là.">
       <div className="panel-gold">
         <p style={{
           fontFamily: 'var(--font-display)', textTransform: 'uppercase',
@@ -129,7 +130,7 @@ function GoldenRule() {
 function Saturday() {
   return (
     <Section
-      id="samedi" num="02" title="Samedi — les duels"
+      id="samedi" icon="target" title="Samedi — les duels"
       badge="Jour 1 · samedi 10 octobre"
       sub="Un contre un, cinq tours, tout le monde joue jusqu'au bout."
     >
@@ -169,7 +170,7 @@ function Saturday() {
 
 function Betting() {
   return (
-    <Section id="paris" num="03" title="Les jetons et les paris" sub="Une seule cagnotte, une seule formule, quatre règles.">
+    <Section id="paris" icon="dice" title="Les jetons et les paris" sub="Une seule cagnotte, une seule formule, quatre règles.">
       <div className="autogrid c280" style={{ marginBottom: 'var(--sp-7)' }}>
         <div className="card list">
           <div className="card-label">D'où viennent les jetons</div>
@@ -234,7 +235,7 @@ function Betting() {
 function Sunday() {
   return (
     <Section
-      id="dimanche" num="04" title="Dimanche — les équipes"
+      id="dimanche" icon="team" title="Dimanche — les équipes"
       badge="Jour 2 · dimanche 11 octobre"
       sub="Chacune contre toutes, et celle qui se repose tient le marché."
     >
@@ -268,7 +269,7 @@ function Sunday() {
 
 function BestGame() {
   return (
-    <Section id="prix" num="05" title="Le prix du meilleur jeu" sub="Concevoir un bon jeu est une façon de gagner à part entière.">
+    <Section id="prix" icon="medal" title="Le prix du meilleur jeu" sub="Concevoir un bon jeu est une façon de gagner à part entière.">
       <p className="prose" style={{ maxWidth: 820, marginBottom: 'var(--sp-7)' }}>
         Deux votes : <strong>meilleur jeu de duel</strong> samedi soir au moment du draft,{' '}
         <strong>meilleur jeu d'équipe</strong> dimanche à la remise des prix. Chacun classe ses{' '}
@@ -308,7 +309,7 @@ function BestGame() {
 
 function Titles() {
   return (
-    <Section id="titres" num="06" title="Les cinq titres" sub="Cinq façons de gagner. Il y en a forcément une pour toi.">
+    <Section id="titres" icon="trophy" title="Les cinq titres" sub="Cinq façons de gagner. Il y en a forcément une pour toi.">
       <div className="autogrid c220" style={{ marginBottom: 'var(--sp-7)' }}>
         {titles.map((t) => {
           const Icon = ICONS[t.icon]
@@ -343,7 +344,7 @@ function Titles() {
 
 function Propose() {
   return (
-    <Section id="proposer" num="07" title="Proposer un jeu" sub="Un jeu par personne. Connu ou inventé, peu importe.">
+    <Section id="proposer" icon="gear" title="Proposer un jeu" sub="Un jeu par personne. Connu ou inventé, peu importe.">
       <div className="split" style={{ gridTemplateColumns: '1.2fr 1fr', marginBottom: 'var(--sp-7)' }}>
         <div>
           <div className="eyebrow" style={{ marginBottom: 'var(--sp-4)' }}>Les contraintes — lisez-les vraiment</div>
@@ -378,7 +379,7 @@ function Propose() {
 
 function Roles() {
   return (
-    <Section id="qui" num="08" title="Qui fait quoi" sub="Trois rôles, et une seule voix qui tranche.">
+    <Section id="qui" icon="team" title="Qui fait quoi" sub="Trois rôles, et une seule voix qui tranche.">
       <div className="autogrid c240">
         {roles.map((r) => (
           <div key={r.name} className="card pad">
