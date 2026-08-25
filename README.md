@@ -69,7 +69,8 @@ couleur et le mot porte le contraste.
 Le design system de BetClash en définit deux, et la page se servait d'un seul.
 
 Le **registre « marché »** — dense, clair, `--text-*`, cartes et listes — porte
-le règlement : c'est du texte long, il faut pouvoir le lire.
+le règlement : c'est là que vivent les tableaux, les schémas et le peu de prose
+qui reste.
 
 Le **registre « moment »** — `--moment-bg`, `--display-xl`, `--shadow-gold-glow`,
 décrit dans les tokens comme des fonds saturés pleine largeur et du texte « lu à
@@ -79,6 +80,52 @@ annonce plutôt qu'elle n'explique.
 Une section repasse dans le registre sombre avec `data-theme="dark"`. Ça
 supposait un changement dans `colors.css` : la palette sombre vivait sur `:root`
 seul, donc impossible à retrouver une fois entré dans un sous-arbre clair.
+
+## Des schémas plutôt que des paragraphes
+
+Les sections expliquaient en prose ce qu'elles auraient pu montrer. Six schémas
+ont pris la place du texte, et la prose courante est passée de **1 065 mots à
+602** — de 36 paragraphes à 25.
+
+| Schéma | Section | Ce qu'il montre que la phrase ne montrait pas |
+|---|---|---|
+| **La frise** | Le week-end | Quatre moments dans l'ordre, et les paris en bande *sous* les quatre : leur portée se voit au lieu de s'annoncer. |
+| **La passerelle** | La règle | Déjà là. Ce sont les quatre paragraphes qui la redisaient qui sont partis. |
+| **Les étapes** | Samedi | L'emboîtement manche → duel → tour → classement → draft, en zoom arrière. |
+| **L'exemple chiffré** | Les paris | Déjà là, et c'est lui le schéma de la section : le pavé qui le précédait disait la même chose en mots. |
+| **La rotation** | Dimanche | Que le rôle *tourne*. Un paragraphe ne peut que l'affirmer. |
+| **La convergence** | Meilleur jeu, Les titres | Que le cinquième titre est fait des quatre autres. Cinq cartes égales le cachaient. |
+
+Tous sont en HTML, aucun en SVG. Le texte ayant été coupé, le schéma porte
+l'information : il doit être lu par un lecteur d'écran, refluer sur un
+téléphone et changer de thème avec la page. Un SVG ne fait bien aucune des
+trois.
+
+Ils partagent une grammaire, apprise une fois : une encre de rôle
+(`data-icon`) donne la couleur, un rail porte l'ordre, un trait plein est ce
+qui joue, un trait tireté ce qui observe. La convergence sert deux fois — deux
+votes qui font un classement, quatre classements qui font un champion — et se
+relit sans effort la seconde.
+
+### Ce qui a été coupé n'a pas été jeté
+
+Les justifications — pourquoi deux classements, pourquoi ces quatre règles,
+pourquoi le remboursement — vivent sous un pli (`<details class="why">`),
+replié par défaut. Le lecteur pressé ne les voit pas, celui qui conteste les
+trouve. Un règlement doit rester consultable ; il n'a pas à être lu en entier
+pour être compris. **251 mots** sont sous le pli plutôt que dans le fil.
+
+`<details>` plutôt qu'un bouton et un état : le contenu existe dans le document
+même sans JS, la recherche du navigateur le trouve, et l'impression le déplie.
+
+### Les entrées en scène se déclarent par attribut
+
+Ajouter un schéma supposait de l'inscrire dans une liste de sélecteurs JS *et*
+dans quatre listes CSS. Deux attributs remplacent tout ça : `data-reveal` pour
+un bloc qui entre d'un coup, `data-stagger` pour un groupe dont les enfants se
+suivent (`data-stagger="tight"` pour les rangées serrées, qui ne changent pas
+d'échelle). Une liste où il faut penser à s'inscrire est une liste où on oublie
+de le faire.
 
 ## Trois principes hérités du design system
 
@@ -102,6 +149,11 @@ Aucun effectif, nombre de tours ou nombre d'équipes n'est codé en dur. Le
 contenu de l'édition vit dans `content.jsx`, les mises en page utilisent des
 grilles qui refluent (`auto-fit`/`minmax`) plutôt que des colonnes comptées :
 une troisième édition se monte en éditant un seul fichier.
+
+Le schéma du dimanche calcule ses appariements à partir de la liste des
+équipes, et prélève les trois lignes montrées à intervalle régulier : prises
+dans l'ordre, elles feraient jouer trois fois la première équipe, et un schéma
+censé montrer que le rôle tourne montrerait le contraire.
 
 L'exemple chiffré des paris suit la même règle, poussée un cran plus loin :
 `bettingExample` ne contient que les deux mises. La cagnotte, les cotes, les
