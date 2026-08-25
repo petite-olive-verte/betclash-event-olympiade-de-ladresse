@@ -53,6 +53,9 @@
   --ink-rank-3:var(--rank-3);     /* les autres distinctions */
   --ink-info:var(--info);         /* information neutre : dates, durées */
   --ink-meta:var(--text-muted);   /* méta : matériel, réglages */
+  /* Une mise perdue est un évènement de marché, pas un refus de l'interface :
+     elle descend de --market-down et jamais de --error. */
+  --ink-loss:var(--market-down);
 }
 
 /* ---- white mode — pour les pages publiques (annonce, accueil) ---- */
@@ -80,6 +83,10 @@
   --ink-rank-1:#ae8209;
   --ink-rank-3:#cd722c;
   --ink-info:#1a88ff;
+  /* Le rouge tombe plus bas en luminance que le vert : à teinte conservée il
+     dépasse la cible de 3,2:1 au lieu de l'atteindre, et 5,3:1 sur --surface
+     est le prix d'un rouge qui reste un rouge. */
+  --ink-loss:#c52626;
   /* `data-theme` vit sur un div, pas sur :root. Un alias déclaré dans :root y
      est résolu une fois pour toutes avec les valeurs du thème sombre, puis
      hérité tel quel : il faut le redéclarer ici pour qu'il relise

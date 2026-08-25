@@ -178,6 +178,230 @@ html { scroll-padding-top: 72px; }
   overflow-x: auto;
 }
 
+/* ---------- L'EXEMPLE CHIFFRÉ DES PARIS ----------
+   Les deux segments de la barre sont dimensionnés en `fr` par les mises
+   elles-mêmes (voir BettingExample) : la largeur n'illustre pas la
+   proportion, elle est la proportion.
+
+   Les couleurs d'issue sont dérivées de leur encre par `color-mix`, comme
+   `.pill.is-active` plus bas, plutôt que prises dans les lavis tout faits :
+   `--jeton-wash` est teinté en thème clair avec le rgb de `--success`, et il
+   n'existe pas de lavis pour `--market-down`. Un fond mélangé depuis l'encre
+   exacte ne peut pas se désaccorder du chiffre qu'il entoure. */
+.example { max-width: 820px; margin-bottom: var(--sp-7); }
+
+.example-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-5);
+}
+.example-tag {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: var(--text-sm);
+  color: var(--ink-brand);
+}
+
+/* Les onglets. `button:focus-visible` est déjà couvert par la règle globale
+   d'anneau de focus, il n'y a rien à redire ici. */
+.example-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--surface-2);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+}
+.example-tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 7px var(--sp-4);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out),
+              color var(--dur-fast) var(--ease-out);
+}
+.example-tab:hover { color: var(--text); }
+/* Le changement d'onglet est un état d'interface, pas une mise en scène : il
+   claque sur --ease-out et le panneau change sans transition. Le reste de la
+   page anime des entrées en scène, ce qui n'est pas la même chose. */
+.example-tab[aria-selected="true"] {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+}
+
+.example-setup {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-4);
+}
+.example-premise { font-size: var(--text-sm); margin: 0; }
+.example-pot { font-size: var(--text-xs); color: var(--text-muted); margin: 0; }
+.example-pot b { color: var(--text); font-size: var(--text-sm); }
+
+.example-bar { display: grid; gap: 3px; }
+/* Nom au-dessus du nombre plutôt qu'à côté : le camp le plus étroit tombe sous
+   les 70 px sur un petit téléphone, où une ligne unique se ferait tronquer
+   alors que deux lignes courtes tiennent.
+
+   Fond neutre, pas le lavis jeton : la barre n'a rien à dire en couleur, son
+   information est sa largeur. */
+.example-seg {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px var(--sp-3);
+  overflow: hidden;
+}
+.example-seg-k {
+  font-size: var(--text-micro);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  color: var(--text-muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.example-seg-v { font-size: var(--text-sm); font-weight: 700; }
+.example-caption {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin: var(--sp-3) 0 var(--sp-5);
+}
+
+.example-panel { outline: none; }
+.example-panel:focus-visible { box-shadow: var(--focus-ring); border-radius: var(--radius-sm); }
+
+.example-camps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--sp-4);
+}
+.example-camp {
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: var(--sp-4);
+  /* Un anneau posé en `inset` plutôt qu'une bordure : le camp gagnant se
+     cerne sans que la carte change de taille d'un onglet à l'autre. Et un
+     anneau seul, sans fond teinté : --ink-jeton est calibré pour des icônes
+     (3,2:1 sur --surface) et tombe sous le seuil dès qu'on lui glisse un
+     lavis vert sous les pieds. Les chiffres de la carte restent donc sur
+     --surface-2, exactement comme les jetons du reste de la page. */
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: box-shadow var(--dur-base) var(--ease-out);
+}
+.example-camp.is-winner {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--jeton) 55%, transparent);
+}
+.example-camp-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--sp-2);
+}
+.example-name {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: var(--text-md);
+}
+/* Le verdict n'est pas porté par la seule couleur : « gagne » et « perd » sont
+   écrits, l'anneau vert ne fait que redire ce que le mot dit déjà. */
+.example-verdict {
+  font-size: var(--text-micro);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+/* Le verdict passe au texte plein, pas à l'encre jeton : à 11 px il faut 4,5:1
+   et l'encre en tient 2,8. C'est l'anneau qui porte le vert, le mot porte le
+   contraste — et « gagne » reste lisible sans voir la couleur. */
+.example-camp.is-winner .example-verdict { color: var(--text); }
+.example-role { font-size: var(--text-micro); color: var(--text-muted); }
+.example-cote {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: var(--lh-tight);
+  margin-top: var(--sp-3);
+}
+.example-calc {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  margin-top: var(--sp-1);
+}
+.example-gain {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  border-top: 1px solid var(--line);
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+}
+
+/* L'issue du pari du lecteur. `--result-ink` est la seule chose qui change
+   entre gain et perte : fond, filet et chiffre en descendent tous les trois.
+   L'encre de perte est --ink-loss, qui descend de --market-down et non de
+   --error : perdre un pari est un évènement de marché, pas un refus de
+   l'interface, et le design system tient les deux rôles séparés. */
+.example-result {
+  --result-ink: var(--ink-jeton);
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+  margin-top: var(--sp-5);
+  padding: var(--sp-2) 0;
+  /* Le filet suffit à découper le bloc, et sans lavis le chiffre reste sur le
+     fond de carte — le plus clair disponible, donc celui où l'encre tient son
+     contraste : 3,2:1 pour le gain, 5,3:1 pour la perte. */
+  border-left: 3px solid var(--result-ink);
+  padding-left: var(--sp-5);
+}
+.example-result.is-lost { --result-ink: var(--ink-loss); }
+.example-result-v {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  line-height: var(--lh-tight);
+  color: var(--result-ink);
+}
+.example-result-t {
+  flex: 1 1 240px;
+  font-size: var(--text-sm);
+  line-height: var(--lh-normal);
+  margin: 0;
+}
+
+.example-note {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin: var(--sp-4) 0 0;
+}
+/* Anton n'existe qu'en 400 : lui demander du gras le fait synthétiser par le
+   navigateur, et le chiffre s'épaissit sans devenir plus lisible. */
+.example-gain b,
+.example-note b {
+  font-family: var(--font-display);
+  font-weight: 400;
+  color: var(--ink-jeton);
+  font-size: var(--text-md);
+}
+
 /* ---------- HERO — registre « moment » ----------
    Les tokens --moment-* sont décrits dans le design system comme des fonds
    saturés pleine largeur, et --display-xl comme du texte « lu à 3 mètres ».
@@ -527,6 +751,7 @@ footer.page-footer {
 .reveal-ready .section-head,
 .reveal-ready .panel-gold,
 .reveal-ready .panel-error,
+.reveal-ready .example,
 .reveal-ready .autogrid > *,
 .reveal-ready .split > *,
 .reveal-ready .card.list > *,
@@ -546,6 +771,7 @@ footer.page-footer {
 .reveal-ready .section-head.is-revealed,
 .reveal-ready .panel-gold.is-revealed,
 .reveal-ready .panel-error.is-revealed,
+.reveal-ready .example.is-revealed,
 .reveal-ready .autogrid.is-revealed > *,
 .reveal-ready .split.is-revealed > *,
 .reveal-ready .card.list.is-revealed > *,
