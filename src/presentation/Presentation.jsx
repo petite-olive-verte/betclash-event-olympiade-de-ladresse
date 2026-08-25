@@ -508,7 +508,8 @@ function BettingExample() {
       </div>
       <p className="example-caption">
         Mises de chaque camp, les <span className="tnum">5</span> jetons de la maison compris.
-        Les <span className="tnum">{pot}</span> jetons vont au camp gagnant, au prorata.
+        Les <span className="tnum">{pot}</span> jetons vont au camp gagnant, partagés selon
+        ce que chacun a misé.
       </p>
 
       <div
