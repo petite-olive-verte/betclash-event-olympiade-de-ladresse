@@ -98,17 +98,17 @@ export const goldenRule = {
 export const saturday = {
   lead: (
     <>
-      <strong>Système suisse</strong> : l'appli t'apparie à ton niveau, sur un jeu que tu n'as
-      pas encore fait.
+      <strong>Système suisse</strong> : l'appli te trouve un adversaire de ton niveau, sur un
+      jeu que tu n'as pas encore fait.
     </>
   ),
   steps: [
     { icon: "target", k: "Un duel", t: "Deux manches gagnantes.", s: "Le gagnant empoche des points et 10 jetons." },
     { icon: "target", k: "Cinq tours", t: "Personne n'est éliminé." },
-    { icon: "trophy", k: "Le classement", t: "Samedi soir.", s: "Il désigne les capitaines." },
+    { icon: "trophy", k: "Le classement", t: "Samedi soir.", s: "Il fait les capitaines." },
     { icon: "team", k: "Le draft", t: "Les capitaines choisissent leurs joueurs.", s: "Devant tout le monde." },
   ],
-  pointsNote: "Le point à 1–2 n'est pas décoratif : il sépare la cinquième de la dixième place.",
+  pointsNote: "Le point à 1–2 compte vraiment : il sépare la cinquième de la dixième place.",
 }
 
 export const points = [
@@ -156,9 +156,10 @@ export const bettingRulesWhy = {
   q: "Pourquoi ces quatre règles",
   a: [
     <>
-      <strong>Le plafond</strong> interdit le tapis : un seul pari ne fait jamais basculer un
-      classement. <strong>Les 5 jetons de la maison</strong> empêchent que tout le monde aille sur
-      le favori, que la cote tombe à 1 et qu'il n'y ait plus rien à gagner.
+      <strong>Le plafond</strong> t'empêche de tout miser d'un coup : un seul pari ne fait
+      jamais basculer un classement. <strong>Les 5 jetons de la maison</strong> empêchent que
+      tout le monde aille sur le favori, que la cote tombe à 1 et qu'il n'y ait plus rien à
+      gagner.
     </>,
     <>
       <strong>La fermeture au coup d'envoi</strong> laisse le temps de miser : les duels suivants
@@ -181,9 +182,8 @@ export const fixedMatch = {
     q: "Pourquoi le remboursement plutôt que la sanction seule",
     a: [
       <>
-        Le remboursement est le cœur du truc : un match truqué ne rapporte structurellement rien à
-        personne, donc il n'y a rien à gagner à en organiser un. La sanction ne fait que solder
-        l'affaire.
+        Le remboursement est le cœur du truc : un match truqué ne rapporte rien à personne,
+        donc il n'y a rien à gagner à en organiser un. La sanction, c'est la punition en plus.
       </>,
     ],
   },
@@ -228,7 +228,7 @@ export const sunday = {
   ),
   teams: ["A", "B", "C", "D"],
   shownRows: 3,
-  note: "Le nombre d'équipes se fixera avec l'effectif ; le principe, lui, ne bouge pas.",
+  note: "On fixera le nombre d'équipes quand on saura combien on est ; le principe, lui, ne bouge pas.",
   side: {
     title: "Paris annexes",
     text: "Score exact, écart, meilleur joueur du match. C'est ce qui sauve l'intérêt quand un match est joué d'avance.",
@@ -238,7 +238,7 @@ export const sunday = {
     a: [
       <>
         Une équipe qui parie sur un match qu'elle ne dispute pas ne peut pas en influencer le
-        résultat. Le marché reste propre par construction, sans une seule règle de plus.
+        résultat. Le marché reste propre tout seul, sans une seule règle de plus.
       </>,
     ],
   },
@@ -250,7 +250,7 @@ export const sunday = {
    classements qui font le champion absolu — deux endroits, une seule idée
    visuelle, apprise une fois. */
 export const bestGame = {
-  lead: "Concevoir un bon jeu est une façon de gagner à part entière.",
+  lead: "Inventer un bon jeu, c'est une façon de gagner aussi.",
   votes: [
     { icon: "target", when: "Samedi soir", what: "Meilleur jeu de duel", sub: "au moment du draft" },
     { icon: "team", when: "Dimanche", what: "Meilleur jeu d'équipe", sub: "à la remise des prix" },
