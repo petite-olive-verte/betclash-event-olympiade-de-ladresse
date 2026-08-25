@@ -128,6 +128,7 @@ export const points = [
 export const jetonSources = [
   { k: "Au départ", v: "100" },
   { k: "Chaque duel gagné", v: "+10" },
+  { k: "Chaque match d'équipe gagné", v: "+10" },
   { k: "Ton jeu est retenu", v: "+10" },
   { k: "Ton jeu élu meilleur jeu", v: "+50" },
 ]
@@ -227,12 +228,20 @@ export const sunday = {
       <strong>celles qui ne jouent pas sont le public — et c'est le public qui parie</strong>.
     </>
   ),
+  betting: {
+    title: "Les paris du dimanche",
+    rules: [
+      { k: "Tes jetons", t: "chacun mise les siens, même contre l'avis de son équipe" },
+      { k: "Comme samedi", t: "même formule, même plafond de 20 %" },
+      { k: "+10 par joueur", t: "dans l'équipe qui gagne le match" },
+    ],
+  },
   teams: ["A", "B", "C", "D"],
   shownRows: 3,
   note: "On fixera le nombre d'équipes quand on saura combien on est ; le principe, lui, ne bouge pas.",
   side: {
     title: "Paris annexes",
-    text: "Score exact, écart, meilleur joueur du match. C'est ce qui sauve l'intérêt quand un match est joué d'avance.",
+    text: "Score exact, écart, meilleur joueur du match — chacun avec sa propre cagnotte et ses propres cotes. C'est ce qui sauve l'intérêt quand un match est joué d'avance.",
   },
   why: {
     q: "Pourquoi ça suffit à tenir le marché",

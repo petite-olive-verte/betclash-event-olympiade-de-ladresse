@@ -720,6 +720,18 @@ function Sunday() {
           <p style={{ fontSize: 15, lineHeight: 'var(--lh-loose)', margin: 0 }}>{sunday.side.text}</p>
         </div>
       </div>
+
+      <div className="eyebrow" style={{ margin: 'var(--sp-8) 0 var(--sp-4)' }}>
+        {sunday.betting.title}
+      </div>
+      <ul className="chips" data-stagger="tight">
+        {sunday.betting.rules.map((r) => (
+          <li key={r.k}>
+            <span className="chips-k">{r.k}</span>
+            <span className="chips-t">{r.t}</span>
+          </li>
+        ))}
+      </ul>
     </Section>
   )
 }
