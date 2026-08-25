@@ -98,8 +98,9 @@ export const goldenRule = {
 export const saturday = {
   lead: (
     <>
-      <strong>Système suisse</strong> : l'appli te trouve un adversaire de ton niveau, sur un
-      jeu que tu n'as pas encore fait.
+      <strong>Système suisse</strong> : à chaque tour, l'appli te trouve un adversaire de ton
+      niveau <strong>que tu n'as pas encore affronté</strong>, sur un{' '}
+      <strong>jeu que tu n'as pas encore fait</strong>.
     </>
   ),
   steps: [
