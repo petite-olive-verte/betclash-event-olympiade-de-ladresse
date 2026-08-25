@@ -278,7 +278,7 @@ function GoldenRule() {
 
         <p className="prose">
           <strong>Parce qu'ils ne mesurent pas la même chose.</strong> Le classement des duels mesure ton
-          adresse au jeu. Le classement des parieurs mesure ta lecture des autres : savoir qui va gagner
+          adresse au jeu. Le classement des parieurs mesure ta lecture des joueurs : savoir qui va gagner
           n'a rien à voir avec savoir gagner. Deux talents, donc deux titres.
         </p>
         <p className="prose">
@@ -503,7 +503,7 @@ function Titles() {
         ))}
       </div>
       <p className="prose muted last" style={{ fontSize: 15, maxWidth: 720 }}>
-        Nul aux jeux d'adresse mais bon lecteur de gens ? Il y a un titre pour toi. Mauvais parieur mais bon
+        Nul aux jeux d'adresse mais bon lecteur de joueurs ? Il y a un titre pour toi. Mauvais parieur mais bon
         inventeur ? Aussi.
       </p>
     </Section>
