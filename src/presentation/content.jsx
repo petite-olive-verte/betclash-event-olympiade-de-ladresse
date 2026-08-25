@@ -310,7 +310,7 @@ export const titles = {
 export const constraints = [
   { k: "< 10 min", t: "une manche, pas plus" },
   { k: "≤ 10 €", t: "ou du matériel déjà à la maison" },
-  { k: "30 s", t: "pour expliquer la règle" },
+  { k: "1 min", t: "pour expliquer la règle" },
   { k: "Adresse", t: "pas de force — tout le monde doit pouvoir jouer" },
   { k: "Score net", t: "clair et incontestable" },
 ]
