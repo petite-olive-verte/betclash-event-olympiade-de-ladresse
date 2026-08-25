@@ -53,7 +53,16 @@ souris, sans JS ou sous `prefers-reduced-motion`, il reste un titre.
 
 Les fichiers de `ds/tokens/` sont copiés à l'identique de Claude Design, à une
 exception près : le bloc `encres d'icône` de `colors.css`, ajouté ici et marqué
-comme tel. À reporter en amont en cas de resynchronisation.
+comme tel. À reporter en amont en cas de resynchronisation. Il contient depuis
+`--ink-loss`, l'encre d'une mise perdue : `--market-down` n'a pas de variante
+claire et plafonne à 2,5:1 sur `--surface`.
+
+Deux choses restent à remonter en amont. `--jeton-wash` est teinté en thème
+clair avec le rgb de `--success`, pas celui de `--jeton` — il jure avec
+`--ink-jeton` posé à côté. Et les encres claires sont calibrées pour des icônes
+(3,2:1) : `--ink-jeton` ne tient pas les 4,5:1 d'un petit texte, ce qui interdit
+de poser un mot en vert sur un fond teinté. Sur cette page l'anneau porte la
+couleur et le mot porte le contraste.
 
 ## Deux registres
 
@@ -93,6 +102,18 @@ Aucun effectif, nombre de tours ou nombre d'équipes n'est codé en dur. Le
 contenu de l'édition vit dans `content.jsx`, les mises en page utilisent des
 grilles qui refluent (`auto-fit`/`minmax`) plutôt que des colonnes comptées :
 une troisième édition se monte en éditant un seul fichier.
+
+L'exemple chiffré des paris suit la même règle, poussée un cran plus loin :
+`bettingExample` ne contient que les deux mises. La cagnotte, les cotes, les
+gains arrondis et **les largeurs du schéma** — passées en `fr` — s'en déduisent
+tous. La barre est donc le rapport des mises, pas une image du rapport : on ne
+peut pas changer un chiffre sans que le dessin suive.
+
+Ses deux onglets ne changent pas le marché — mêmes mises, mêmes cotes, même
+barre — seulement son dénouement. C'est le but : la cote est fixée par les
+mises, pas par le résultat, et le même pari vaut **+26 ou −10** selon un duel
+qui n'a pas encore été joué. Un exemple qui ne montrerait que le gain serait la
+façon habituelle de mentir sur un pari.
 
 ## Déploiement
 

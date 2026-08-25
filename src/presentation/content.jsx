@@ -66,6 +66,28 @@ export const bettingRules = [
   <>Les paris <strong>ferment quand la première manche commence</strong>. Les duels suivants sont affichés à l'avance : tu paries pendant que le duel en cours se joue.</>,
 ]
 
+/* Le duel qui sert d'exemple. On ne pose que les mises : la cagnotte, les
+   cotes, les gains et les largeurs du schéma s'en déduisent tous par calcul,
+   donc un chiffre changé ici refait le dessin avec. Un exemple dont les
+   nombres sont écrits à la main finit toujours par se contredire lui-même. */
+export const bettingExample = {
+  stake: 10,                                     // dans le plafond de 20 % d'une cagnotte de départ
+  camps: [
+    { name: 'Alice', role: 'la favorite', staked: 65 },
+    // `yours` marque le camp sur lequel mise le lecteur. Un drapeau posé sur le
+    // camp plutôt qu'un nom répété ailleurs : il n'y a pas deux endroits à
+    // garder d'accord.
+    { name: 'Bob', role: "l'outsider", staked: 25, yours: true },
+  ],
+  // Les deux dénouements du même pari. `won` dit si le camp du lecteur
+  // l'emporte — le camp gagnant s'en déduit, donc l'onglet ne peut pas
+  // annoncer l'inverse de ce qu'il montre.
+  outcomes: [
+    { tab: 'Pari réussi', won: true },
+    { tab: 'Pari raté', won: false },
+  ],
+}
+
 export const titles = [
   { icon: "target", name: "Champion des duels", meta: "Samedi, individuel" },
   { icon: "team", name: "Équipe championne", meta: "Dimanche, collectif" },

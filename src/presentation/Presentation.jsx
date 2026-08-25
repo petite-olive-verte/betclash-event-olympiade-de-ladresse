@@ -1,11 +1,11 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useId, useRef, useState } from 'react'
 import { Button, Countdown } from '../ds'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Icon } from './icons.jsx'
 import { ShootableTitle, ShootingRange } from './ShootingRange.jsx'
 import {
   event, stats, navItems, brief, points, jetonSources, bettingRules,
-  titles, constraints, proposalFormat, roles,
+  bettingExample, titles, constraints, proposalFormat, roles,
 } from './content.jsx'
 import './presentation.css'
 
@@ -47,7 +47,7 @@ function useSectionSpy(ids) {
 /* Les groupes qui entrent en scène. Passer par des sélecteurs plutôt que par
    une prop sur chaque bloc évite d'avoir à baliser une trentaine d'endroits —
    et un groupe oublié se voit tout de suite, il n'apparaît simplement pas. */
-const REVEAL = '.section-head, .autogrid, .split, .card.list, .panel-gold, .bullets, .panel-error'
+const REVEAL = '.section-head, .autogrid, .split, .card.list, .panel-gold, .bullets, .panel-error, .example'
 
 function useReveal() {
   useEffect(() => {
@@ -338,6 +338,193 @@ function Saturday() {
   )
 }
 
+/* La formule tient en une ligne, mais une division ne se sent pas. Le schéma
+   donne à chaque camp la largeur de ce qui est misé dessus et pose sa cote
+   juste dessous : large et petite, étroite et grosse — le rapport inverse se
+   voit avant de se lire. Tout sort de `bettingExample`, largeurs comprises,
+   passées en `fr` ; la barre est le rapport, pas une image du rapport.
+
+   Les deux onglets ne touchent pas au marché — mêmes mises, mêmes cotes, même
+   barre. Ils n'en changent que le dénouement, et c'est justement ce qu'on veut
+   faire sentir : la cote est fixée par les mises, pas par le résultat, et le
+   même pari vaut +26 ou −10 selon un duel qui n'a pas encore été joué. Sans le
+   second onglet la page ne montrerait que les gains, ce qui est la manière
+   habituelle de mentir sur un pari.
+
+   Convention de balisage du bloc : `<b>` porte les nombres mis en avant, qui
+   passent en display, et `<strong>` l'emphase de prose. Les deux ont des
+   rendus différents, il faut les choisir en connaissance de cause. */
+function BettingExample() {
+  const { stake, camps, outcomes } = bettingExample
+  const uid = useId()
+  const [tab, setTab] = useState(0)
+  const tabRefs = useRef([])
+
+  const pot = camps.reduce((total, c) => total + c.staked, 0)
+  const odds = camps.map((c) => pot / c.staked)
+  // Les gains sont arrondis au jeton supérieur — c'est la règle de la page,
+  // pas un arrondi d'affichage : 13,8 devient 14, et le lecteur peut refaire
+  // le calcul sur la carte sans tomber sur un autre chiffre.
+  const payouts = odds.map((o) => Math.ceil(stake * o))
+  // Virgule décimale, et deux décimales même quand la seconde est nulle : deux
+  // cotes côte à côte se comparent au chiffre près, pas à la longueur près.
+  const cote = (n) => n.toFixed(2).replace('.', ',')
+
+  // Un duel a deux camps. L'outsider est celui sur qui on a le moins misé — pas
+  // celui qui est écrit en second : la chute reste vraie si on inverse les deux
+  // mises dans `content.jsx`.
+  const outsider = camps[0].staked <= camps[1].staked ? 0 : 1
+  const favorite = 1 - outsider
+  // Le camp du lecteur. `Math.max` garde la page debout si le drapeau saute.
+  const mine = Math.max(camps.findIndex((c) => c.yours), 0)
+  const { won } = outcomes[tab]
+  const winner = won ? mine : 1 - mine
+
+  // Onglets ARIA : les flèches changent d'onglet et emmènent le focus avec
+  // elles. Sans ça il resterait sur un bouton qui vient de passer en
+  // `tabindex="-1"`, et la tabulation suivante repartirait du début de la page.
+  const select = (i) => {
+    setTab(i)
+    tabRefs.current[i]?.focus()
+  }
+  const onKeyDown = (e) => {
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key]
+    if (!step) return
+    e.preventDefault()
+    select((tab + step + outcomes.length) % outcomes.length)
+  }
+
+  return (
+    <div className="card pad example">
+      <div className="example-head">
+        <span className="example-tag">Un exemple</span>
+        <div
+          className="example-tabs"
+          role="tablist"
+          aria-label="Dénouement du pari"
+          onKeyDown={onKeyDown}
+        >
+          {outcomes.map((o, i) => (
+            <button
+              key={o.tab}
+              ref={(el) => { tabRefs.current[i] = el }}
+              type="button"
+              role="tab"
+              id={`${uid}-tab-${i}`}
+              aria-selected={tab === i}
+              aria-controls={`${uid}-panel`}
+              tabIndex={tab === i ? 0 : -1}
+              className="example-tab"
+              onClick={() => select(i)}
+            >
+              {o.tab}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="example-setup">
+        <p className="example-premise">
+          Tu mises <span className="tnum">{stake}</span> jetons sur{' '}
+          <strong>{camps[mine].name}</strong>.
+        </p>
+        <p className="example-pot">
+          Cagnotte du duel <b className="tnum">{pot}</b> jetons
+        </p>
+      </div>
+
+      {/* Décoratif au sens strict : la barre ne dit rien que les deux cartes
+          ne redisent en toutes lettres, elle le dit en largeur. */}
+      <div
+        className="example-bar"
+        style={{ gridTemplateColumns: camps.map((c) => `${c.staked}fr`).join(' ') }}
+        aria-hidden="true"
+      >
+        {camps.map((c) => (
+          <div key={c.name} className="example-seg">
+            <span className="example-seg-k">{c.name}</span>
+            <span className="example-seg-v tnum">{c.staked}</span>
+          </div>
+        ))}
+      </div>
+      <p className="example-caption">
+        Ce qui est misé sur chaque camp, les <span className="tnum">5</span> jetons que la
+        maison pose de chaque côté compris. Les <span className="tnum">{pot}</span> jetons vont
+        au camp gagnant, partagés au prorata des mises.
+      </p>
+
+      <div
+        className="example-panel"
+        id={`${uid}-panel`}
+        role="tabpanel"
+        aria-labelledby={`${uid}-tab-${tab}`}
+        tabIndex={0}
+      >
+        <div className="example-camps">
+          {camps.map((c, i) => (
+            <div key={c.name} className={`example-camp${i === winner ? ' is-winner' : ''}`}>
+              <div className="example-camp-head">
+                <span className="example-name">{c.name}</span>
+                <span className="example-verdict">{i === winner ? 'gagne' : 'perd'}</span>
+              </div>
+              <div className="example-role">{c.role}</div>
+              <div className="example-cote tnum">{cote(odds[i])}</div>
+              <div className="example-calc tnum">cote = {pot} ÷ {c.staked}</div>
+              <div className="example-gain">
+                {i === winner ? (
+                  <>
+                    Miser <span className="tnum">{stake}</span> ici rapporte{' '}
+                    <b className="tnum">{payouts[i]}</b>
+                  </>
+                ) : (
+                  <>Les mises de ce camp sont perdues.</>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className={`example-result${won ? '' : ' is-lost'}`}>
+          <span className="example-result-v tnum">
+            {won ? `+${payouts[mine] - stake}` : `−${stake}`}
+          </span>
+          <p className="example-result-t">
+            {won ? (
+              <>
+                <strong>{camps[winner].name}</strong> gagne. Tu récupères{' '}
+                <span className="tnum">{payouts[mine]}</span> jetons pour ta mise de{' '}
+                <span className="tnum">{stake}</span>.
+              </>
+            ) : (
+              <>
+                <strong>{camps[winner].name}</strong> gagne. Ta mise ne revient pas : ce sont les{' '}
+                <span className="tnum">{camps[winner].staked}</span> jetons misés sur{' '}
+                {camps[winner].name} qui se partagent les <span className="tnum">{pot}</span>.
+              </>
+            )}
+          </p>
+        </div>
+
+        <p className="example-note">
+          {won ? (
+            <>
+              Même mise, même risque : <b className="tnum">+{payouts[outsider] - stake}</b> sur{' '}
+              {camps[outsider].role} contre <b className="tnum">+{payouts[favorite] - stake}</b> sur{' '}
+              {camps[favorite].role}.
+            </>
+          ) : (
+            <>
+              Une mise perdue l'est en entier — c'est le prix de la cote à{' '}
+              <span className="tnum">{cote(odds[mine])}</span>. C'est à ça que sert le plafond de{' '}
+              <strong>20 %</strong> : un duel raté ne ruine personne.
+            </>
+          )}
+        </p>
+      </div>
+    </div>
+  )
+}
+
 function Betting() {
   return (
     <Section id="paris" icon="dice" title="Les jetons et les paris" sub="Une seule cagnotte, une seule formule, quatre règles.">
@@ -372,6 +559,8 @@ function Betting() {
         <strong>Miser sur l'outsider quand personne n'y croit, c'est là que ça paie.</strong> Les cotes
         bougent en direct dans l'appli au fur et à mesure des mises.
       </p>
+
+      <BettingExample />
 
       <div className="eyebrow" style={{ marginBottom: 'var(--sp-4)' }}>Les quatre règles</div>
       <ul className="bullets">
