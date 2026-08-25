@@ -79,8 +79,7 @@ export const constraints = [
   <>Matériel <strong>déjà à la maison, ou moins de 10 €</strong>.</>,
   <>La règle <strong>s'explique en 30 secondes</strong>.</>,
   <>C'est de <strong>l'adresse, pas de la force</strong>. Tout le monde doit pouvoir jouer.</>,
-  <>Le <strong>score est clair et incontestable</strong>. Pas de « c'était plus beau ».</>,
-  <>On peut <strong>l'enchaîner en boucle</strong> toute la journée.</>,
+  <>Le <strong>score est clair et incontestable</strong>.</>,
 ]
 
 export const proposalFormat = [
