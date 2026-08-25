@@ -4,8 +4,10 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Icon } from './icons.jsx'
 import { ShootableTitle, ShootingRange } from './ShootingRange.jsx'
 import {
-  event, stats, navItems, brief, points, jetonSources, bettingRules,
-  bettingExample, titles, constraints, proposalFormat, roles,
+  event, stats, navItems, weekend, goldenRule, saturday, points,
+  jetonSources, bettingIntro, bettingRounding, bettingKicker, bettingRules,
+  bettingRulesWhy, refund, fixedMatch, bettingExample, sunday, bestGame,
+  titles, constraints, proposalFormat, sponsorNote, roles,
 } from './content.jsx'
 import './presentation.css'
 
@@ -46,8 +48,13 @@ function useSectionSpy(ids) {
 
 /* Les groupes qui entrent en scène. Passer par des sélecteurs plutôt que par
    une prop sur chaque bloc évite d'avoir à baliser une trentaine d'endroits —
-   et un groupe oublié se voit tout de suite, il n'apparaît simplement pas. */
-const REVEAL = '.section-head, .autogrid, .split, .card.list, .panel-gold, .bullets, .panel-error, .example'
+   et un groupe oublié se voit tout de suite, il n'apparaît simplement pas.
+
+   Les schémas ajoutés depuis se déclarent par attribut plutôt que par classe :
+   `data-reveal` pour un bloc qui entre d'un coup, `data-stagger` pour un
+   groupe dont les enfants se suivent. Une classe de plus à ajouter ici *et*
+   dans quatre listes de sélecteurs CSS, c'était la garantie d'en oublier une. */
+const REVEAL = '.section-head, .autogrid, .split, .card.list, .panel-gold, .bullets, .panel-error, .example, [data-reveal], [data-stagger]'
 
 function useReveal() {
   useEffect(() => {
@@ -218,17 +225,90 @@ function StickyBar() {
   )
 }
 
-/* ------------------------------------------------------------ SECTIONS */
-function Brief() {
+/* --------------------------------------------------- PIÈCES PARTAGÉES */
+
+/* Ce qui a été coupé du fil de lecture n'a pas été jeté : chaque règle garde
+   sa justification sous un pli. `<details>` plutôt qu'un bouton et un état :
+   le contenu existe dans le document même sans JS, la recherche du navigateur
+   le trouve, et l'impression le déplie. */
+function Why({ q, a }) {
   return (
-    <Section id="bref" icon="clock" title="Le week-end en bref" sub="Ce qu'il faut savoir avant de lire le reste.">
-      <div className="autogrid c260">
-        {brief.map((b) => (
-          <div key={b.day} className="card pad" style={{ padding: 28 }}>
-            <div className="eyebrow" style={{ marginBottom: 10 }}>{b.day}</div>
-            <p style={{ margin: 0, fontSize: 15, lineHeight: 'var(--lh-loose)' }}>{b.text}</p>
-          </div>
+    <details className="why">
+      <summary>{q}</summary>
+      <div className="why-body">
+        {a.map((p, i) => <p key={i}>{p}</p>)}
+      </div>
+    </details>
+  )
+}
+
+/* Deux votes qui font un classement, quatre classements qui font un champion :
+   c'est deux fois la même figure, donc un seul schéma — appris en bas de la
+   section « meilleur jeu », relu sans effort dans « les titres ».
+
+   Le rail est décoratif au sens strict. Ce qu'il montre — la cible est faite
+   des sources — est écrit dans le sous-titre de la cible, sinon la relation
+   n'existerait que pour ceux qui voient le dessin. */
+function Converge({ sources, target }) {
+  return (
+    <div className="converge" style={{ '--n': sources.length }} data-stagger>
+      <ul className="converge-src">
+        {sources.map((s) => (
+          <li key={s.what} className="converge-card" data-icon={s.icon}>
+            <Icon name={s.icon} size={24} />
+            {s.when && <span className="converge-when">{s.when}</span>}
+            <span className="converge-what">{s.what}</span>
+            {s.sub && <span className="converge-sub">{s.sub}</span>}
+          </li>
         ))}
+      </ul>
+
+      <div className="converge-link" aria-hidden="true">
+        {sources.map((s) => <span key={s.what} className="converge-tick" />)}
+        <span className="converge-rail" />
+        <span className="converge-drop" />
+      </div>
+
+      <div
+        className={`converge-target${target.gold ? ' is-gold' : ' card'}`}
+        data-icon={target.icon}
+      >
+        <Icon name={target.icon} size={32} />
+        <span className="converge-what">{target.what}</span>
+        <span className="converge-sub">{target.sub}</span>
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------ SECTIONS */
+
+/* Trois cartes de prose racontaient un déroulé en colonnes — or un déroulé se
+   lit dans l'ordre. Les quatre moments passent sur un axe, et les paris en
+   bande sous les quatre : leur portée est le week-end entier, et c'est la
+   bande qui le dit, plus la phrase « tout le week-end ». */
+function Weekend() {
+  return (
+    <Section
+      id="bref" icon="clock" title="Le week-end en bref"
+      sub="Quatre moments, et des paris tout du long."
+    >
+      <ol className="frise" data-stagger="tight">
+        {weekend.moments.map((m) => (
+          <li key={m.what} className="frise-step" data-icon={m.icon}>
+            <span className="frise-when">{m.when}</span>
+            <span className="frise-what">{m.what}</span>
+            <span className="frise-sub">{m.sub}</span>
+          </li>
+        ))}
+      </ol>
+
+      <div className="frise-band" data-icon={weekend.band.icon} data-reveal>
+        <Icon name={weekend.band.icon} size={22} />
+        <div>
+          <b>{weekend.band.what}</b>{' '}
+          <span>{weekend.band.sub}</span>
+        </div>
       </div>
     </Section>
   )
@@ -236,18 +316,12 @@ function Brief() {
 
 function GoldenRule() {
   return (
-    <Section
-      id="regle" icon="book" title="Une règle importante"
-      moment
-    >
+    <Section id="regle" icon="book" title="Une règle importante" moment>
       <div className="panel-gold">
         <p className="rule-headline">
-          Gagner des duels rapporte des jetons.<br />Gagner des paris ne rapporte aucun point.
+          {goldenRule.headline[0]}<br />{goldenRule.headline[1]}
         </p>
-        <p className="prose">
-          Il y a deux classements, et <strong>une seule passerelle entre eux</strong>. Elle ne va que dans
-          un sens : le terrain remplit la cagnotte, la cagnotte ne remplit jamais le terrain.
-        </p>
+        <p className="prose">{goldenRule.lead}</p>
 
         <div className="oneway" aria-hidden="true">
           <div className="oneway-side" data-icon="target">
@@ -274,64 +348,49 @@ function GoldenRule() {
           </div>
         </div>
 
-        <div className="eyebrow" style={{ marginTop: 'var(--sp-6)' }}>Pourquoi deux classements séparés</div>
+        <p className="rule-kicker">{goldenRule.kicker}</p>
 
-        <p className="prose">
-          <strong>Parce qu'ils ne mesurent pas la même chose.</strong> Le classement des duels mesure ton
-          adresse au jeu. Le classement des parieurs mesure ta lecture des joueurs : savoir qui va gagner
-          n'a rien à voir avec savoir gagner. Deux talents, donc deux titres.
-        </p>
-        <p className="prose">
-          <strong>Et parce que les mélanger casserait les deux.</strong> Si les paris alimentaient le
-          classement des duels, on pourrait y grimper sans jouer. Pire : il deviendrait rentable de miser
-          contre soi puis de perdre son duel exprès. C'est exactement ce qui s'est passé l'an dernier —
-          parier rapportait plus que jouer.
-        </p>
-        <p className="prose">
-          Cette année, si tu perds volontairement, tu perds des points bien réels et tu gagnes une monnaie
-          qui ne te fera pas remonter.
-        </p>
-        <p className="rule-kicker">Ça ne vaut jamais le coup. C'est fait pour.</p>
+        <Why {...goldenRule.why} />
       </div>
     </Section>
   )
 }
 
+/* Le samedi est un emboîtement : une manche dans un duel, un duel dans un
+   tour, cinq tours dans un classement, un classement dans un draft. Quatre
+   paragraphes le décrivaient chacun à leur tour ; les étapes numérotées le
+   montrent en zoom arrière, dans l'ordre où on le vit. Le barème reste un
+   tableau — trois colonnes de chiffres n'ont rien à gagner à devenir un
+   dessin. */
 function Saturday() {
   return (
     <Section
       id="samedi" icon="target" title="Samedi — les duels"
       badge="Jour 1 · samedi 10 octobre"
-      sub="Un contre un, cinq tours, tout le monde joue jusqu'au bout."
     >
       <div className="split">
         <div>
-          <p className="prose">
-            On joue en <strong>système suisse</strong> : à chaque tour, l'appli t'apparie avec quelqu'un
-            qui a à peu près ton niveau, sur un jeu que tu n'as pas encore fait.{' '}
-            <strong>Personne n'est éliminé</strong>, tout le monde joue les cinq tours.
-          </p>
-          <p className="prose">
-            Un duel se joue en <strong>deux manches gagnantes</strong>. Chaque duel gagné rapporte en plus{' '}
-            <strong style={{ color: 'var(--ink-jeton)' }}>10 jetons</strong> pour parier.
-          </p>
-          <p className="prose muted" style={{ marginBottom: 'var(--sp-7)' }}>
-            Le point de consolation à 1–2 n'est pas décoratif : sur cinq tours, il fait la différence entre
-            la cinquième et la dixième place. Accrochez-vous même mal partis.
-          </p>
-          <div className="eyebrow">Le draft, samedi soir</div>
-          <p className="prose last">
-            Les <strong>premiers du classement</strong> deviennent capitaines — autant qu'il y aura
-            d'équipes — et choisissent leurs joueurs à tour de rôle, devant tout le monde. D'où l'intérêt de
-            bien finir la journée.
-          </p>
+          <p className="prose">{saturday.lead}</p>
+
+          <ol className="steps" data-stagger>
+            {saturday.steps.map((s) => (
+              <li key={s.k} data-icon={s.icon}>
+                <span className="steps-k">{s.k}</span>
+                <span className="steps-t">{s.t}</span>
+                {s.s && <span className="steps-s">{s.s}</span>}
+              </li>
+            ))}
+          </ol>
         </div>
 
-        <div className="card list">
-          <div className="card-label">Les points</div>
-          {points.map((p) => (
-            <Row key={p.k} k={p.k} v={p.v} color={p.strong ? 'var(--ink-brand)' : 'var(--text-muted)'} />
-          ))}
+        <div>
+          <div className="card list">
+            <div className="card-label">Les points</div>
+            {points.map((p) => (
+              <Row key={p.k} k={p.k} v={p.v} color={p.strong ? 'var(--ink-brand)' : 'var(--text-muted)'} />
+            ))}
+          </div>
+          <p className="note">{saturday.pointsNote}</p>
         </div>
       </div>
     </Section>
@@ -448,9 +507,8 @@ function BettingExample() {
         ))}
       </div>
       <p className="example-caption">
-        Ce qui est misé sur chaque camp, les <span className="tnum">5</span> jetons que la
-        maison pose de chaque côté compris. Les <span className="tnum">{pot}</span> jetons vont
-        au camp gagnant, partagés au prorata des mises.
+        Mises de chaque camp, les <span className="tnum">5</span> jetons de la maison compris.
+        Les <span className="tnum">{pot}</span> jetons vont au camp gagnant, au prorata.
       </p>
 
       <div
@@ -525,6 +583,11 @@ function BettingExample() {
   )
 }
 
+/* L'exemple chiffré est déjà le schéma de la section : il montre la cote, le
+   gain et la perte sur un cas qu'on peut refaire de tête. Le pavé de prose qui
+   le précédait redisait tout ça en mots — il est parti. Les quatre règles
+   gardent leur « pourquoi », mais en une ligne grise : c'est ce qui les rend
+   acceptables, ça ne doit pas peser autant que la règle elle-même. */
 function Betting() {
   return (
     <Section id="paris" icon="dice" title="Les jetons et les paris" sub="Une seule cagnotte, une seule formule, quatre règles.">
@@ -542,84 +605,118 @@ function Betting() {
         <div className="card pad">
           <div className="card-label" style={{ padding: 0, marginBottom: 14 }}>Comment marchent les paris</div>
           <p style={{ fontSize: 'var(--text-sm)', lineHeight: 'var(--lh-loose)', margin: '0 0 16px' }}>
-            Personne ne fixe les cotes. Tout le monde mise, et la cagnotte du duel est partagée entre les
-            gagnants au prorata de leur mise.
+            {bettingIntro}
           </p>
           <div className="formula">
             cote = cagnotte du duel ÷ ce qui est misé sur ce camp<br />
             gain = ta mise × la cote
           </div>
+          <p className="note">{bettingRounding}</p>
         </div>
       </div>
 
       <p className="prose" style={{ maxWidth: 820, marginBottom: 'var(--sp-7)' }}>
-        C'est tout. Il n'y a pas d'autre source, et <strong>ils ne se transforment jamais en points</strong>.
-        Les gains sont <strong>arrondis au jeton supérieur</strong> : la maison absorbe les centimes, jamais
-        toi. Plus il y a de monde sur un joueur, moins il paie.{' '}
-        <strong>Miser sur l'outsider quand personne n'y croit, c'est là que ça paie.</strong> Les cotes
-        bougent en direct dans l'appli au fur et à mesure des mises.
+        <strong>{bettingKicker}</strong> Les cotes bougent en direct dans l'appli, au fur et à
+        mesure des mises.
       </p>
 
       <BettingExample />
 
       <div className="eyebrow" style={{ marginBottom: 'var(--sp-4)' }}>Les quatre règles</div>
-      <ul className="bullets">
-        {bettingRules.map((r, i) => <li key={i}>{r}</li>)}
+      <ul className="rulegrid" data-stagger>
+        {bettingRules.map((r) => (
+          <li key={r.k}>
+            <span className="rulegrid-k">{r.k}</span>
+            <p className="rulegrid-t">{r.t}</p>
+          </li>
+        ))}
       </ul>
-      <p style={{ fontSize: 15, color: 'var(--text-muted)', margin: '0 0 var(--sp-7)' }}>
-        Égalité, forfait, blessure : <strong>tout le monde est remboursé</strong>.
-      </p>
+      <p className="note">{refund}</p>
+      <Why {...bettingRulesWhy} />
 
       <div className="panel-error">
         <div style={{
           fontFamily: 'var(--font-display)', textTransform: 'uppercase',
           fontSize: 14, color: 'var(--error)', marginBottom: 10,
         }}>
-          Match arrangé
+          {fixedMatch.title}
         </div>
-        <p style={{ fontSize: 15, lineHeight: 'var(--lh-loose)', margin: '0 0 10px' }}>
-          Si un duel n'est visiblement pas joué sérieusement, le commissaire l'annule.{' '}
-          <strong>Tous les paris sont remboursés</strong>, le duel est rejoué, et celui qui a fait le malin
-          prend <strong>−3 points</strong>.
+        <p style={{ fontSize: 15, lineHeight: 'var(--lh-loose)', margin: 0 }}>
+          {fixedMatch.text}
         </p>
-        <p style={{ fontSize: 14, color: 'var(--text-muted)', margin: 0 }}>
-          Le remboursement est le cœur du truc : un match truqué ne peut structurellement rien rapporter à
-          personne.
-        </p>
+        <Why {...fixedMatch.why} />
       </div>
     </Section>
   )
 }
 
+/* La règle du dimanche est une rotation des rôles : deux équipes jouent, les
+   autres parient. Trois lignes la montrent, et elles montrent en prime qu'elle
+   tourne — ce qu'un paragraphe ne peut qu'affirmer.
+
+   Les appariements sont calculés, pas écrits : changer la liste des équipes
+   dans `content.jsx` refait le schéma et le compte de matchs avec. Le nombre
+   d'équipes du jour J n'est pas connu, il ne pouvait pas être codé en dur. */
 function Sunday() {
+  const { teams, shownRows } = sunday
+  const pairs = []
+  for (let i = 0; i < teams.length; i++) {
+    for (let j = i + 1; j < teams.length; j++) pairs.push([i, j])
+  }
+  // Les trois lignes montrées sont prélevées à intervalle régulier, pas prises
+  // dans l'ordre : les premiers appariements font tous jouer la première
+  // équipe, et un schéma censé montrer que le rôle tourne montrerait alors
+  // trois fois la même équipe sur le terrain.
+  const shown = Array.from({ length: Math.min(shownRows, pairs.length) }, (_, i) =>
+    pairs[Math.round((i * (pairs.length - 1)) / Math.max(shownRows - 1, 1))])
+
   return (
     <Section
       id="dimanche" icon="team" title="Dimanche — les équipes"
       badge="Jour 2 · dimanche 11 octobre"
-      sub="Chacune contre toutes, et celle qui se repose tient le marché."
+      sub="Chacune contre toutes, et celles qui se reposent tiennent le marché."
     >
       <div className="split">
         <div>
-          <p className="prose">
-            Chaque équipe affronte toutes les autres. À chaque match,{' '}
-            <strong>au moins une équipe ne joue pas</strong> : c'est elle le public, et{' '}
-            <strong>c'est elle qui parie.</strong>
+          <p className="prose">{sunday.lead}</p>
+
+          <ol className="rota" data-stagger="tight">
+            {shown.map(([a, b]) => (
+              <li key={`${teams[a]}-${teams[b]}`}>
+                <span className="rota-group">
+                  <span className="team plays">{teams[a]}</span>
+                  <span className="rota-vs">vs</span>
+                  <span className="team plays">{teams[b]}</span>
+                </span>
+                <span className="rota-group is-bets">
+                  <span className="rota-label">parient</span>
+                  {teams.filter((_, k) => k !== a && k !== b).map((t) => (
+                    <span key={t} className="team bets">{t}</span>
+                  ))}
+                </span>
+              </li>
+            ))}
+          </ol>
+
+          <p className="note">
+            <span className="tnum">{shown.length}</span> des{' '}
+            <span className="tnum">{pairs.length}</span> matchs d'un tournoi à{' '}
+            <span className="tnum">{teams.length}</span> équipes. {sunday.note}
           </p>
-          <p className="prose muted">
-            Ce n'est pas un détail d'organisation. Une équipe qui parie sur un match qu'elle ne dispute pas
-            ne peut pas en influencer le résultat — le marché reste propre par construction, sans qu'on ait
-            besoin d'une seule règle en plus.
-          </p>
-          <p className="prose last">
-            On fixera le nombre d'équipes une fois qu'on saura combien on est. Le principe, lui, ne bouge pas.
-          </p>
+
+          {/* La convention plein / tireté est la même que la bande des paris de
+              la frise. Elle ne s'apprend qu'une fois, mais elle s'apprend. */}
+          <div className="schema-legend" aria-hidden="true">
+            <span><i className="team plays" /> joue</span>
+            <span><i className="team bets" /> parie</span>
+          </div>
+
+          <Why {...sunday.why} />
         </div>
+
         <div className="card pad" style={{ padding: 28 }}>
-          <div className="eyebrow" style={{ fontSize: 14, marginBottom: 10 }}>Paris annexes</div>
-          <p style={{ fontSize: 15, lineHeight: 'var(--lh-loose)', margin: 0 }}>
-            En plus du vainqueur, on ouvre des paris sur le score exact, l'écart, le meilleur joueur du
-            match. C'est ce qui sauve l'intérêt quand un match est joué d'avance.
-          </p>
+          <div className="eyebrow" style={{ fontSize: 14, marginBottom: 10 }}>{sunday.side.title}</div>
+          <p style={{ fontSize: 15, lineHeight: 'var(--lh-loose)', margin: 0 }}>{sunday.side.text}</p>
         </div>
       </div>
     </Section>
@@ -628,72 +725,47 @@ function Sunday() {
 
 function BestGame() {
   return (
-    <Section id="prix" icon="medal" title="Le prix du meilleur jeu" sub="Concevoir un bon jeu est une façon de gagner à part entière.">
-      <p className="prose" style={{ maxWidth: 820, marginBottom: 'var(--sp-7)' }}>
-        Deux votes : <strong>meilleur jeu de duel</strong> samedi soir au moment du draft,{' '}
-        <strong>meilleur jeu d'équipe</strong> dimanche à la remise des prix. Chacun classe ses{' '}
-        <strong>trois jeux préférés</strong> — 3, 2 et 1 points.{' '}
-        <strong>Interdit de voter pour le sien.</strong>
-      </p>
+    <Section id="prix" icon="medal" title="Le prix du meilleur jeu" sub={bestGame.lead}>
+      <Converge sources={bestGame.votes} target={bestGame.target} />
+
+      <ul className="chips" data-stagger="tight" style={{ margin: 'var(--sp-7) 0', maxWidth: 820 }}>
+        {bestGame.how.map((h) => (
+          <li key={h.k}>
+            <span className="chips-k">{h.k}</span>
+            <span className="chips-t">{h.t}</span>
+          </li>
+        ))}
+      </ul>
 
       <div className="eyebrow" style={{ marginBottom: 'var(--sp-4)' }}>On vote sur deux questions</div>
       <ul className="bullets">
-        <li><strong>Lequel tu remets l'an prochain ?</strong></li>
-        <li><strong>Lequel est le mieux réglé ?</strong> Règles claires, score incontestable, équilibré.</li>
+        {bestGame.criteria.map((c, i) => <li key={i}>{c}</li>)}
       </ul>
 
-      <p className="prose muted" style={{ maxWidth: 820, fontSize: 15, marginBottom: 'var(--sp-7)' }}>
-        La deuxième question n'est pas là pour décorer. Un jeu où seul son parrain gagne, ça se voit en deux
-        duels, et ça coûte le prix.{' '}
-        <strong>Inventez des jeux justes, pas des jeux où vous gagnez.</strong>
-      </p>
+      <div className="panel-prize">{bestGame.prize}</div>
+      <p className="note" style={{ maxWidth: 820 }}>{bestGame.note}</p>
 
-      <div style={{
-        background: 'var(--gold-wash)', border: '1px solid var(--gold-line)',
-        borderRadius: 'var(--radius-md)', padding: 'var(--sp-6)', maxWidth: 820, marginBottom: 'var(--sp-5)',
-      }}>
-        <p style={{ fontSize: 15, lineHeight: 'var(--lh-loose)', margin: 0 }}>
-          Le gagnant de samedi touche <strong style={{ color: 'var(--ink-jeton)' }}>50 jetons</strong>,
-          utilisables dès dimanche. C'est autant que si tu avais gagné tous tes duels de la journée.
-        </p>
-      </div>
-
-      <p style={{ fontSize: 14, color: 'var(--text-faint)', maxWidth: 820, margin: 0 }}>
-        À noter — ces points vont au <strong>classement des créateurs</strong>, pas au classement des duels.
-        Le champion des duels se gagne sur le terrain, jamais par un vote.
-      </p>
+      <Why {...bestGame.why} />
     </Section>
   )
 }
 
+/* Cinq cartes égales cachaient que le cinquième titre est fait des quatre
+   autres. Le schéma le dit sans phrase, et il ne reste qu'un seul élément doré
+   dans la section — c'est là tout l'intérêt d'un accent : il ne signale que
+   s'il est rare. */
 function Titles() {
   return (
-    <Section id="titres" icon="trophy" title="Les cinq titres" sub="Cinq façons de gagner. Il y en a forcément une pour toi.">
-      <div className="autogrid c220" style={{ marginBottom: 'var(--sp-7)' }}>
-        {titles.map((t) => (
-            <div
-              key={t.name}
-              className={`title-card${t.highlight ? '' : ' card'}`}
-              data-icon={t.icon}
-              style={{
-                borderRadius: 'var(--radius-md)',
-                padding: 'var(--sp-6)',
-                ...(t.highlight
-                  ? { background: 'var(--gold-wash)', border: '1px solid var(--gold-line)' }
-                  : {}),
-              }}
-            >
-              <div className="title-card-icon"><Icon name={t.icon} size={40} /></div>
-              <div style={{ fontFamily: 'var(--font-display)', textTransform: 'uppercase', fontSize: 16, marginBottom: 4 }}>
-                {t.name}
-              </div>
-              <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t.meta}</div>
-            </div>
-        ))}
-      </div>
-      <p className="prose muted last" style={{ fontSize: 15, maxWidth: 720 }}>
-        Nul aux jeux d'adresse mais bon lecteur de joueurs ? Il y a un titre pour toi. Mauvais parieur mais bon
-        inventeur ? Aussi.
+    <Section
+      id="titres" icon="trophy" title="Les cinq titres"
+      sub="Quatre classements, et un cinquième titre qui se fait des quatre."
+    >
+      <Converge
+        sources={titles.rankings.map((r) => ({ icon: r.icon, what: r.name, sub: r.meta }))}
+        target={{ ...titles.absolute, what: titles.absolute.name, sub: titles.absolute.meta, gold: true }}
+      />
+      <p className="prose muted last" style={{ fontSize: 15, maxWidth: 720, marginTop: 'var(--sp-7)' }}>
+        {titles.kicker}
       </p>
     </Section>
   )
@@ -702,11 +774,16 @@ function Titles() {
 function Propose() {
   return (
     <Section id="proposer" icon="gear" title="Proposer un jeu" sub="Un jeu par personne. Connu ou inventé, peu importe.">
-      <div className="split" style={{ gridTemplateColumns: '1.2fr 1fr', marginBottom: 'var(--sp-7)' }}>
+      <div className="split wide-left" style={{ marginBottom: 'var(--sp-7)' }}>
         <div>
           <div className="eyebrow" style={{ marginBottom: 'var(--sp-4)' }}>Les contraintes — lisez-les vraiment</div>
-          <ul className="bullets" style={{ marginBottom: 0 }}>
-            {constraints.map((c, i) => <li key={i}>{c}</li>)}
+          <ul className="chips" data-stagger="tight">
+            {constraints.map((c) => (
+              <li key={c.k}>
+                <span className="chips-k">{c.k}</span>
+                <span className="chips-t">{c.t}</span>
+              </li>
+            ))}
           </ul>
         </div>
         <div className="card list">
@@ -719,11 +796,7 @@ function Propose() {
         </div>
       </div>
 
-      <p className="prose last" style={{ fontSize: 15, maxWidth: 820 }}>
-        Si votre jeu est retenu, vous en êtes le <strong>parrain</strong> : vous apportez le matos et vous
-        expliquez la règle le jour J. Et vous démarrez avec{' '}
-        <strong style={{ color: 'var(--ink-jeton)' }}>10 jetons de bonus</strong>.
-      </p>
+      <p className="prose last" style={{ fontSize: 15, maxWidth: 820 }}>{sponsorNote}</p>
     </Section>
   )
 }
@@ -756,7 +829,7 @@ export default function Presentation() {
     <div data-theme="light" style={{ background: 'var(--bg)', color: 'var(--text)', minHeight: '100vh', overflowX: 'hidden' }}>
       <StickyBar />
       <Hero />
-      <Brief />
+      <Weekend />
       <GoldenRule />
       <Saturday />
       <Betting />
