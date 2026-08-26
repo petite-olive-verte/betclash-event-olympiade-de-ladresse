@@ -700,6 +700,69 @@ footer.page-footer {
 }
 .stickybar-cd { flex: none; }
 
+/* ---- LE SOMMAIRE DU TÉLÉPHONE ----
+   Sept pastilles dans 360 px, ça ne rentre pas : la rangée débordait et se
+   faisait couper à gauche, si bien que les deux premières sections
+   n'existaient plus. En dessous de 760 px elle devient un bouton et un
+   panneau.
+
+   Le bouton porte le nom de la section qu'on lit. Une simple icône de menu
+   aurait rendu la place sans rendre le repère, et c'était tout ce que les
+   pastilles apportaient encore une fois leurs libellés masqués. */
+.stickybar-toggle {
+  display: none;
+  align-items: center;
+  gap: var(--sp-2);
+  min-width: 0;
+  margin-right: auto;
+  appearance: none;
+  cursor: pointer;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+.stickybar-toggle > svg { flex: none; }
+.stickybar-toggle > svg:first-child { color: var(--icon-ink); }
+/* Le chevron dit ce qui va se passer, et se retourne quand c'est fait. */
+.stickybar-toggle > svg:last-child {
+  color: var(--text-faint);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.stickybar-toggle[aria-expanded="true"] { border-color: var(--gold-line); }
+.stickybar-toggle[aria-expanded="true"] > svg:last-child { transform: rotate(180deg); }
+/* Le nom de section est la seule chose élastique de la barre : c'est lui qui
+   cède quand le décompte s'allonge, pas la mise en page. */
+.stickybar-toggle-l {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stickybar-menu { display: none; }
+/* Plus spécifique que la règle d'affichage du média : `hidden` doit gagner
+   partout, sinon le panneau fermé resterait dans la page. */
+.stickybar-menu[hidden] { display: none; }
+.stickybar-menu a {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+.stickybar-menu a > svg { color: var(--icon-ink); flex: none; }
+.stickybar-menu a.is-active {
+  background: color-mix(in srgb, var(--icon-ink) 14%, transparent);
+  color: var(--text);
+}
+
 /* Sous 1100 px, les libellés tombent et il ne reste que les icônes : c'est
    exactement ce que le code couleur permet de faire sans perdre le sens. */
 @media (max-width: 1100px) {
@@ -709,9 +772,29 @@ footer.page-footer {
 @media (max-width: 760px) {
   .stickybar-in { padding: var(--sp-2) var(--gutter-mobile); gap: var(--sp-3); }
   .stickybar-brand { display: none; }
+  .stickybar-nav { display: none; }
+  .stickybar-toggle { display: inline-flex; }
+  .stickybar-menu {
+    display: block;
+    border-top: 1px solid var(--line);
+    /* Plus opaque que la barre : un menu à travers lequel on lit la page se
+       lit deux fois moins bien. */
+    background: color-mix(in srgb, var(--bg) 96%, transparent);
+    padding: var(--sp-2) var(--sp-2) var(--sp-3);
+    /* Sept entrées tiennent partout, mais une huitième sur un écran court ne
+       doit pas sortir de l'écran sans moyen d'y revenir. */
+    max-height: calc(100dvh - 60px);
+    overflow-y: auto;
+    animation: menu-in calc(var(--dur-base) * .8) var(--ease-out);
+  }
+}
+@keyframes menu-in {
+  from { opacity: 0; transform: translateY(-6px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .stickybar { transition: opacity var(--dur-base), visibility var(--dur-base); transform: none; }
+  .stickybar-menu { animation: none; }
+  .stickybar-toggle > svg:last-child { transition: none; }
 }
 
 /* ═══════════════════════════════════════════════════ ENTRÉES EN SCÈNE
