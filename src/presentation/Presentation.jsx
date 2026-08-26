@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useId, useRef, useState } from 'react'
 import { Button, Countdown } from '../ds'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react'
 import { Icon } from './icons.jsx'
 import { ShootableTitle, ShootingRange } from './ShootingRange.jsx'
 import {
@@ -185,19 +185,83 @@ function Hero() {
 function StickyBar() {
   const current = useContext(CurrentSection)
   const [shown, setShown] = useState(false)
+  const [open, setOpen] = useState(false)
+  const menuId = useId()
+  const toggleRef = useRef(null)
+  const barRef = useRef(null)
 
   useEffect(() => {
     const hero = document.getElementById('hero')
     if (!hero) return
-    const io = new IntersectionObserver(([e]) => setShown(!e.isIntersecting), { threshold: 0 })
+    const io = new IntersectionObserver(([e]) => {
+      const visible = !e.isIntersecting
+      setShown(visible)
+      // La barre qui s'en va emmène son menu avec elle. Sans ça, remonter au
+      // hero laisse un panneau ouvert dans une barre invisible, qui réapparaît
+      // déplié au défilement suivant. Fermé ici, à l'endroit où la barre
+      // disparaît, plutôt que dans un effet qui court après son propre état.
+      if (!visible) setOpen(false)
+    }, { threshold: 0 })
     io.observe(hero)
     return () => io.disconnect()
   }, [])
 
+  // Échap referme et rend le focus au bouton — sinon il reste sur un lien qui
+  // vient de quitter le document. Un appui ailleurs referme aussi : un menu
+  // qu'on ne peut fermer qu'en visant le bouton est un piège sur un téléphone.
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e) => {
+      if (e.key !== 'Escape') return
+      setOpen(false)
+      toggleRef.current?.focus()
+    }
+    const onDown = (e) => { if (!barRef.current?.contains(e.target)) setOpen(false) }
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('pointerdown', onDown)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('pointerdown', onDown)
+    }
+  }, [open])
+
+  // Le bouton porte le nom de la section qu'on lit. C'est ce que faisaient les
+  // pastilles, et c'est la seule chose qu'elles disaient qu'on perdrait à les
+  // replier derrière une icône de menu.
+  const item = navItems.find((n) => n.href.slice(1) === current)
+  const label = item ? item.label : 'Le règlement'
+  const icon = item ? item.icon : 'book'
+
   return (
-    <div className={`stickybar${shown ? ' is-shown' : ''}`} data-theme="dark" aria-hidden={!shown}>
+    <div
+      ref={barRef}
+      className={`stickybar${shown ? ' is-shown' : ''}`}
+      data-theme="dark"
+      aria-hidden={!shown}
+    >
       <div className="stickybar-in">
-        <a className="stickybar-brand" href="#hero">{event.name.join(' ')}</a>
+        <a className="stickybar-brand" href="#hero" tabIndex={shown ? undefined : -1}>
+          {event.name.join(' ')}
+        </a>
+
+        {/* Deux sommaires pour un seul rôle : celui qui ne sert pas est en
+            `display: none`, donc il sort aussi de l'arbre d'accessibilité —
+            un lecteur d'écran n'en rencontre jamais deux. */}
+        <button
+          type="button"
+          ref={toggleRef}
+          className="stickybar-toggle"
+          data-icon={icon}
+          aria-expanded={open}
+          aria-controls={menuId}
+          tabIndex={shown ? undefined : -1}
+          onClick={() => setOpen((v) => !v)}
+        >
+          <Icon name={icon} size={16} />
+          <span className="stickybar-toggle-l">{label}</span>
+          <ChevronDown size={16} strokeWidth={1.75} absoluteStrokeWidth />
+        </button>
+
         <nav className="stickybar-nav" aria-label="Sections du règlement">
           {navItems.map((n) => {
             const active = current === n.href.slice(1)
@@ -217,10 +281,39 @@ function StickyBar() {
             )
           })}
         </nav>
+
         <div className="stickybar-cd">
           <Countdown target={event.startsAt} variant="compact" label="J−" />
         </div>
       </div>
+
+      {/* Toujours dans le document, masqué par `hidden` : `aria-controls` doit
+          désigner un élément qui existe, et un panneau monté à l'ouverture ne
+          répond à rien tant qu'il n'est pas là. `hidden` le retire aussi bien
+          de la mise en page que de la tabulation. */}
+      <nav
+        className="stickybar-menu"
+        id={menuId}
+        hidden={!open}
+        aria-label="Sections du règlement"
+      >
+          {navItems.map((n) => {
+            const active = current === n.href.slice(1)
+            return (
+              <a
+                key={n.href}
+                href={n.href}
+                data-icon={n.icon}
+                className={active ? 'is-active' : undefined}
+                aria-current={active ? 'true' : undefined}
+                onClick={() => setOpen(false)}
+              >
+                <Icon name={n.icon} size={18} />
+                {n.label}
+              </a>
+            )
+          })}
+      </nav>
     </div>
   )
 }
