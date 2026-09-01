@@ -386,6 +386,8 @@ function Weekend() {
       id="bref" icon="clock" title="Le week-end en bref"
       sub="Quatre moments, et des paris tout du long."
     >
+      <p className="prose" data-reveal>{weekend.purpose}</p>
+
       <ol className="frise" data-stagger="tight">
         {weekend.moments.map((m) => (
           <li key={m.what} className="frise-step" data-icon={m.icon}>

@@ -42,6 +42,12 @@ export const navItems = [
    et les paris en bande sous les quatre, parce que c'est exactement leur
    portée. La bande dit « tout le week-end » mieux qu'une phrase qui le dit. */
 export const weekend = {
+  purpose: (
+    <>
+      <strong>S'amuser entre amis</strong>, sur des jeux d'adresse que chacun apporte. Le reste —
+      les tours, les jetons, les titres — n'est là que pour donner un cadre.
+    </>
+  ),
   moments: [
     { when: "Samedi", icon: "target", what: "Les duels", sub: "cinq tours, un contre un" },
     { when: "Samedi soir", icon: "trophy", what: "Le draft", sub: "les premiers font les équipes" },
