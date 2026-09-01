@@ -7,7 +7,7 @@ import {
   event, stats, navItems, weekend, goldenRule, saturday, points,
   jetonSources, bettingIntro, bettingRounding, bettingKicker, bettingRules,
   bettingRulesWhy, refund, fixedMatch, bettingExample, sunday, bestGame,
-  titles, constraints, proposalFormat, sponsorNote, roles,
+  titles, constraints, proposalFormat, sponsorNote, signup, roles,
 } from './content.jsx'
 import './presentation.css'
 
@@ -386,6 +386,8 @@ function Weekend() {
       id="bref" icon="clock" title="Le week-end en bref"
       sub="Quatre moments, et des paris tout du long."
     >
+      <p className="prose" data-reveal>{weekend.purpose}</p>
+
       <ol className="frise" data-stagger="tight">
         {weekend.moments.map((m) => (
           <li key={m.what} className="frise-step" data-icon={m.icon}>
@@ -902,8 +904,33 @@ function Propose() {
         </div>
       </div>
 
-      <p className="prose last" style={{ fontSize: 15, maxWidth: 820 }}>{sponsorNote}</p>
+      <p className="prose" style={{ fontSize: 15, maxWidth: 820 }}>{sponsorNote}</p>
+
+      <Signup />
     </Section>
+  )
+}
+
+/* ------------------------------------------------------------- S'INSCRIRE
+   Le formulaire porte les questions ; la page n'en reprend aucune. Il n'y a
+   donc rien à copier, rien à coller, et rien à tenir en double ici. */
+
+function Signup() {
+  return (
+    <div className="signup card pad" data-reveal>
+      <div className="eyebrow">{signup.eyebrow}</div>
+      <p className="prose" style={{ fontSize: 15 }}>{signup.lead}</p>
+
+      <div className="signup-actions">
+        {/* Le formulaire est ailleurs : il s'ouvre à côté, la page reste
+            ouverte derrière pour qu'on puisse y revenir vérifier une règle. */}
+        <Button variant="primary" href={signup.formUrl} target="_blank">
+          {signup.formLabel}
+        </Button>
+      </div>
+
+      <p className="prose muted last" style={{ fontSize: 'var(--text-sm)' }}>{signup.note}</p>
+    </div>
   )
 }
 

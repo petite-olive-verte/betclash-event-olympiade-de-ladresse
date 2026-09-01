@@ -42,6 +42,12 @@ export const navItems = [
    et les paris en bande sous les quatre, parce que c'est exactement leur
    portée. La bande dit « tout le week-end » mieux qu'une phrase qui le dit. */
 export const weekend = {
+  purpose: (
+    <>
+      <strong>S'amuser entre amis</strong>, sur des jeux d'adresse que chacun apporte. Le reste —
+      les tours, les jetons, les titres — n'est là que pour donner un cadre.
+    </>
+  ),
   moments: [
     { when: "Samedi", icon: "target", what: "Les duels", sub: "cinq tours, un contre un" },
     { when: "Samedi soir", icon: "trophy", what: "Le draft", sub: "les premiers font les équipes" },
@@ -340,6 +346,26 @@ export const sponsorNote = (
     <strong>10 jetons de bonus</strong>.
   </>
 )
+
+/* ─────────────────────────────────────────────────────────── S'INSCRIRE
+   S'inscrire et proposer un jeu sont le même geste, donc le même formulaire.
+   Il vit chez Typeform : la page reste un fichier statique, elle n'a rien à
+   collecter. Les questions y reprennent `proposalFormat` une par une — le
+   format annoncé au-dessus et le formulaire disent la même chose.
+
+   Le lien pointe sur le formulaire publié ; le changer ici suffit. */
+export const signup = {
+  eyebrow: "L'inscription",
+  lead: (
+    <>
+      <strong>Ton inscription, c'est ton jeu.</strong> Le formulaire reprend le format ci-dessus,
+      question par question. Deux minutes, et c'est réglé.
+    </>
+  ),
+  formUrl: "https://form.typeform.com/to/AguOVZAE",
+  formLabel: "S'inscrire et proposer mon jeu",
+  note: "Un jeu par personne. S'il est déjà pris, on te le dit dans le groupe et tu en proposes un autre.",
+}
 
 export const roles = [
   { name: "Le commissaire", text: "Il tranche les litiges. Sa décision est finale, pas de débat." },

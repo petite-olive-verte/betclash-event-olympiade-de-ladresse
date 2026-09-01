@@ -21,6 +21,7 @@ export function Button({
   fullWidth = false,
   onClick,
   href,
+  target,
 }) {
   const v = variants[variant] || variants.primary
   const s = sizes[size] || sizes.md
@@ -45,10 +46,14 @@ export function Button({
   }
 
   // Variante lien : même rendu, sémantique correcte quand l'action navigue.
+  // `rel` accompagne toujours une ouverture dans un autre onglet : sans lui, la
+  // page ouverte garde une prise sur celle-ci.
   if (href && !disabled) {
     return (
       <a
         href={href}
+        target={target}
+        rel={target === '_blank' ? 'noopener noreferrer' : undefined}
         style={{ ...style, display: 'inline-block', textDecoration: 'none' }}
         {...press}
       >
