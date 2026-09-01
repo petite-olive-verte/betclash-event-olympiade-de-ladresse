@@ -618,6 +618,23 @@ footer.page-footer {
 }
 .format-row > svg { color: var(--icon-ink); flex: none; }
 
+
+/* ------------------------------------------------------------- S'INSCRIRE
+   Un seul élément doré dans la section, et c'est le bouton qui ferme la
+   page : le lien du groupe. Le reste du bloc reste en registre « marché ». */
+.signup {
+  margin-top: var(--sp-7);
+  max-width: 820px;
+}
+.signup .eyebrow { margin-bottom: var(--sp-3); }
+
+.signup-actions {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-top: var(--sp-5);
+}
+
 /* Aucun de ces états n'est porteur d'information à lui seul : les couper ne
    retire rien au contenu. */
 @media (prefers-reduced-motion: reduce) {

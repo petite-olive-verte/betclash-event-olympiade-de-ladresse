@@ -347,6 +347,26 @@ export const sponsorNote = (
   </>
 )
 
+/* ─────────────────────────────────────────────────────────── S'INSCRIRE
+   S'inscrire et proposer un jeu sont le même geste, donc le même formulaire.
+   Il vit chez Typeform : la page reste un fichier statique, elle n'a rien à
+   collecter. Les questions y reprennent `proposalFormat` une par une — le
+   format annoncé au-dessus et le formulaire disent la même chose.
+
+   Le lien pointe sur le formulaire publié ; le changer ici suffit. */
+export const signup = {
+  eyebrow: "L'inscription",
+  lead: (
+    <>
+      <strong>Ton inscription, c'est ton jeu.</strong> Le formulaire reprend le format ci-dessus,
+      question par question. Deux minutes, et c'est réglé.
+    </>
+  ),
+  formUrl: "https://form.typeform.com/to/AguOVZAE",
+  formLabel: "S'inscrire et proposer mon jeu",
+  note: "Un jeu par personne. S'il est déjà pris, on te le dit dans le groupe et tu en proposes un autre.",
+}
+
 export const roles = [
   { name: "Le commissaire", text: "Il tranche les litiges. Sa décision est finale, pas de débat." },
   { name: "Le greffier", text: "Il saisit les scores dans l'appli." },
