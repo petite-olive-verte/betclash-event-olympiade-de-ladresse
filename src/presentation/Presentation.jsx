@@ -335,7 +335,7 @@ function Why({ q, a }) {
   )
 }
 
-/* Deux votes qui font un classement, quatre classements qui font un champion :
+/* Un vote qui fait un classement, quatre classements qui font un champion :
    c'est deux fois la même figure, donc un seul schéma — appris en bas de la
    section « meilleur jeu », relu sans effort dans « les titres ».
 

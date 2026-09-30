@@ -1343,7 +1343,7 @@ footer.page-footer {
 .schema-legend i { width: 14px; height: 14px; border-radius: 4px; flex: none; }
 
 /* --------------------------------------------------------- LA CONVERGENCE
-   Deux votes qui font un classement, quatre classements qui font un champion :
+   Un vote qui fait un classement, quatre classements qui font un champion :
    deux fois la même figure, donc un seul schéma, appris une fois et relu la
    seconde. Le rail collecte, la descente conclut.
 
@@ -1367,6 +1367,9 @@ footer.page-footer {
   height: 100%;
 }
 .converge-card > svg { color: var(--icon-ink); }
+/* Une source seule ne s'étale pas sur toute la largeur : elle prend la
+   carte de la cible pour mesure, et reste dans l'axe de la descente. */
+.converge-card:only-child { justify-self: center; width: 100%; max-width: 420px; }
 .converge-when {
   display: block;
   font-size: var(--text-micro);

@@ -103,8 +103,8 @@ trois.
 
 Ils partagent une grammaire, apprise une fois : une encre de rôle
 (`data-icon`) donne la couleur, un rail porte l'ordre, un trait plein est ce
-qui joue, un trait tireté ce qui observe. La convergence sert deux fois — deux
-votes qui font un classement, quatre classements qui font un champion — et se
+qui joue, un trait tireté ce qui observe. La convergence sert deux fois — un
+vote qui fait un classement, quatre classements qui font un champion — et se
 relit sans effort la seconde.
 
 ### Ce qui a été coupé n'a pas été jeté

@@ -110,19 +110,19 @@ export const saturday = {
     </>
   ),
   steps: [
-    { icon: "target", k: "Un duel", t: "Deux manches gagnantes.", s: "Le gagnant empoche des points et 10 jetons." },
+    { icon: "target", k: "Un duel", t: "Trois manches gagnantes — il s'en joue de 3 à 5.", s: "Le gagnant empoche des points et 10 jetons." },
     { icon: "target", k: "Cinq tours", t: "Personne n'est éliminé." },
     { icon: "trophy", k: "Le classement", t: "Samedi soir.", s: "Il fait les capitaines." },
     { icon: "team", k: "Le draft", t: "Les capitaines choisissent leurs joueurs.", s: "Devant tout le monde." },
   ],
-  pointsNote: "Le point à 1–2 compte vraiment : il sépare la cinquième de la dixième place.",
+  pointsNote: "Arracher une manche en perdant vaut un point, et ce point compte vraiment : il sépare la cinquième de la dixième place.",
 }
 
 export const points = [
-  { k: "Victoire 2 – 0", v: "4 pts", strong: true },
-  { k: "Victoire 2 – 1", v: "3 pts", strong: true },
-  { k: "Défaite 1 – 2", v: "1 pt", strong: false },
-  { k: "Défaite 0 – 2", v: "0 pt", strong: false },
+  { k: "Victoire 3 – 0", v: "4 pts", strong: true },
+  { k: "Victoire 3 – 1 ou 3 – 2", v: "3 pts", strong: true },
+  { k: "Défaite 2 – 3 ou 1 – 3", v: "1 pt", strong: false },
+  { k: "Défaite 0 – 3", v: "0 pt", strong: false },
 ]
 
 /* ────────────────────────────────────────────────────── JETONS ET PARIS
@@ -230,7 +230,8 @@ export const bettingExample = {
 export const sunday = {
   lead: (
     <>
-      Chaque équipe affronte toutes les autres. À chaque match,{' '}
+      Chaque équipe affronte toutes les autres, en trois manches gagnantes et au même barème
+      que samedi. À chaque match,{' '}
       <strong>celles qui ne jouent pas sont le public — et c'est le public qui parie</strong>.
     </>
   ),
@@ -261,17 +262,16 @@ export const sunday = {
 }
 
 /* ───────────────────────────────────────────────────── LE MEILLEUR JEU
-   Deux votes qui alimentent un seul classement : c'est une convergence, et
-   une convergence se dessine. Le même schéma sert plus bas pour les quatre
-   classements qui font le champion absolu — deux endroits, une seule idée
-   visuelle, apprise une fois. */
+   Un seul vote, le dimanche soir, sur tous les jeux : il fait à lui seul le
+   classement des créateurs. Le schéma de convergence le montre avec une
+   seule source ; il sert plus bas pour les quatre classements qui font le
+   champion absolu — deux endroits, une seule idée visuelle, apprise une fois. */
 export const bestGame = {
   lead: "Inventer un bon jeu, c'est une façon de gagner aussi.",
   votes: [
-    { icon: "target", when: "Samedi soir", what: "Meilleur jeu de duel", sub: "au moment du draft" },
-    { icon: "team", when: "Dimanche", what: "Meilleur jeu d'équipe", sub: "à la remise des prix" },
+    { icon: "gear", when: "Dimanche soir", what: "Meilleur jeu", sub: "tous les jeux, duel et équipe, juste avant la remise des prix" },
   ],
-  target: { icon: "medal", what: "Classement des créateurs", sub: "le cumul des deux votes" },
+  target: { icon: "medal", what: "Classement des créateurs", sub: "le résultat du vote" },
   how: [
     { k: "3 jeux", t: "chacun classe ses trois préférés" },
     { k: "3 · 2 · 1", t: "les points, dans cet ordre" },
@@ -283,8 +283,8 @@ export const bestGame = {
   ],
   prize: (
     <>
-      Le gagnant de samedi touche <strong>50 jetons</strong> utilisables dès dimanche : autant
-      qu'une journée de duels gagnés.
+      Le parrain du jeu élu touche <strong>50 jetons</strong> : autant qu'une journée de duels
+      gagnés.
     </>
   ),
   note: "Ces points vont au classement des créateurs, jamais à celui des duels.",
@@ -308,7 +308,7 @@ export const titles = {
     { icon: "target", name: "Champion des duels", meta: "Samedi, individuel" },
     { icon: "team", name: "Équipe championne", meta: "Dimanche, collectif" },
     { icon: "dice", name: "Meilleur parieur", meta: "En jetons, sur les deux jours" },
-    { icon: "medal", name: "Meilleur créateur", meta: "Le cumul des deux votes" },
+    { icon: "medal", name: "Meilleur créateur", meta: "Le vote du dimanche soir" },
   ],
   absolute: {
     icon: "trophy",
