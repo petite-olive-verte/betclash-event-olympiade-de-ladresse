@@ -136,7 +136,6 @@ export const jetonSources = [
   { k: "Chaque duel gagné", v: "+10" },
   { k: "Chaque match d'équipe gagné", v: "+10" },
   { k: "Ton jeu est retenu", v: "+10" },
-  { k: "Ton jeu élu meilleur jeu", v: "+50" },
 ]
 
 export const bettingIntro =
@@ -283,8 +282,8 @@ export const bestGame = {
   ],
   prize: (
     <>
-      Le parrain du jeu élu touche <strong>50 jetons</strong> : autant qu'une journée de duels
-      gagnés.
+      Le vote ne rapporte <strong>aucun jeton</strong>, à personne. Ses points font le classement
+      des créateurs, et c'est ce classement qui désigne le <strong>Meilleur créateur</strong>.
     </>
   ),
   note: "Ces points vont au classement des créateurs, jamais à celui des duels.",
